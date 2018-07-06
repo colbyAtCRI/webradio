@@ -1,0 +1,84 @@
+ <meta charset="UTF-8">
+<html>
+   <head>
+     <link rel="stylesheet" type="text/css" href="css/radio.css">
+     <script href="src/plotter.js"></script>
+   </head>
+	<body>
+		<br>
+		<br>
+		<textarea id=r readonly cols=140 rows=80></textarea><br>
+		<input type="text" id=m cols=40 rows=1>
+		<button id=b onclick="sendmsg();">Send</button>
+      <br>
+      <canvas class="plotter" id="plot" style="border:1px solid #000000"></canvas>
+      <script>setsize("plot");</script>
+	</body>
+
+
+<script>
+function get_appropriate_ws_url(extra_url)
+{
+	var pcol;
+	var u = document.URL;
+
+	/*
+	 * We open the websocket encrypted if this page came on an
+	 * https:// url itself, otherwise unencrypted
+	 */
+
+	if (u.substring(0, 5) == "https") {
+		pcol = "wss://";
+		u = u.substr(8);
+	} else {
+		pcol = "ws://";
+		if (u.substring(0, 4) == "http")
+			u = u.substr(7);
+	}
+
+	u = u.split('/');
+
+	/* + "/xxx" bit is for IE10 workaround */
+
+	return pcol + u[0] + "/" + extra_url;
+}
+
+function new_ws(urlpath, protocol)
+{
+	if (typeof MozWebSocket != "undefined")
+		return new MozWebSocket(urlpath, protocol);
+
+	return new WebSocket(urlpath, protocol);
+}
+
+ws = new_ws(get_appropriate_ws_url(""), "config");
+try {
+	ws.onopen = function() {
+		document.getElementById("m").disabled = 0;
+		document.getElementById("b").disabled = 0;
+	}
+
+	ws.onmessage =function got_packet(msg) {
+		document.getElementById("r").value =
+			document.getElementById("r").value + msg.data + "\n";
+		document.getElementById("r").scrollTop =
+			document.getElementById("r").scrollHeight;
+	}
+
+	ws.onclose = function(){
+		document.getElementById("m").disabled = 1;
+		document.getElementById("b").disabled = 1;
+	}
+} catch(exception) {
+	alert('<p>Error' + exception);
+}
+
+function sendmsg()
+{
+	ws.send(document.getElementById("m").value);
+	document.getElementById("m").value = "";
+}
+
+</script>
+
+</html>
