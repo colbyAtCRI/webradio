@@ -108,6 +108,8 @@ int webserver_callback(lws *wsi,
     case LWS_CALLBACK_RECEIVE:
       radio->processInput(wsi,in,len);
       break;
+    default:
+      break;
   }
   return 0;
 }
@@ -219,9 +221,12 @@ void WebSocketServer::run()
 {
   int nerr(0);
   configure();
+  cout << "running xx" << endl;
   while (nerr >= 0 && !interrupted) {
     // Do all the websocket servicing
+    cout << "nerr = " << nerr << endl;
     nerr = lws_service(mContext,1000);
+    cout << "nerr = " << nerr << endl;
     // For radio hardware it is typical for IQ data to be collected in
     // frames in a collection thread or by monitoring data on USB devices.
     // which are not websockets. A Radio class will register these file
@@ -230,7 +235,9 @@ void WebSocketServer::run()
     for (auto dev : mDevice)
       if (dev->dataReady())
         dev->processInput();
+    cout << "still" << endl;
   }
+  cout << "done" << endl;
   cout << endl;
 }
 

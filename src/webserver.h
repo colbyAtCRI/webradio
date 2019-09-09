@@ -75,10 +75,10 @@ public:
   ~WebSocketCustomer();
 
   // LWS_CALLBACK_PROTOCOL_INIT
-  virtual bool protocolInit(lws *ws) {}
+  virtual bool protocolInit(lws *ws) { return true; }
 
   // LWS_CALLBACK_ESTABLISHED
-  virtual void established(lws *ws) {}
+  virtual void established(lws *ws) { }
 
   // LWS_CALLBACK_RECEIVE
   virtual void processInput(lws *ws, void *in, size_t len) {}

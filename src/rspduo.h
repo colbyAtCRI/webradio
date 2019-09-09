@@ -33,7 +33,7 @@ class RSPduo : public WebSocketCustomer
 {
   JConfig             mCfg;
   StreamWriterBuilder mJSON;
-  Reader              mReader;
+  CharReaderBuilder   mReaderBuilder;
   static const string mConfigChannel;
   static const string mIQDataChannel;
   pthread_mutex_t     mLock; // every radio must have it's own mutex

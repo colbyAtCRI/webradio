@@ -1,6 +1,7 @@
 VPATH = ../src
 CFLAGS = -std=c++11
-INC = -I/usr/include/jsoncpp
+INC = -I/usr/include/jsoncpp -I/usr/local/opt/openssl/include/
+
 OBJ = main.o webserver.o iqdata.o spectrum.o utility.o jconfig.o rspduo.o
 
 rspduo: $(OBJ)

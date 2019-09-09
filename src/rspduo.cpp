@@ -129,7 +129,7 @@ RSPduo::RSPduo(WebSocketServer *srv) : WebSocketCustomer(srv)
   };
   mProtocols.push_back(prot[0]);
   mProtocols.push_back(prot[1]);
-  mProtocols.push_back(prot[2]);
+  //mProtocols.push_back(prot[2]);
 
   mBufferPipe = new BufferPipe(this,(Action)&RSPduo::onBufferComplete);
   server()->add(mBufferPipe);
@@ -236,7 +236,7 @@ void RSPduo::onBufferComplete()
     server()->sendAllChannels(mIQDataChannel,buffer->begin(),buffer->size());
     yieldFullBuffer(buffer);
   }
-  while (buffer = getFullBuffer())
+  while ((buffer = getFullBuffer()))
     yieldFullBuffer(buffer);
 }
 
@@ -249,7 +249,9 @@ void RSPduo::processOutput(lws *wsi)
 Value RSPduo::parse(const char *in, size_t len)
 {
   Value root;
-  mReader.parse(in,in+len,root,false);
+  CharReader *reader = mReaderBuilder.newCharReader();
+  reader->parse(in,in+len,&root,NULL);
+  delete reader;
   return root;
 }
 
@@ -470,6 +472,7 @@ bool RSPduo::protocolInit(lws *wsi)
     mCfg.protect("radios");
     mCfg.protect("run-level");
   }
+  return true;
 }
 
 string RSPduo::configAsString()

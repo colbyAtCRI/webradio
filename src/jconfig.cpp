@@ -7,15 +7,17 @@ int JConfig::merge(Value from, Value &to)
   for (auto key : from.getMemberNames()) {
     if (isProtedted(key))
       continue;
-    if (to.isMember(key) && to[key].type() == from[key].type())
-      if (from[key].isObject())
+    if (to.isMember(key) && to[key].type() == from[key].type()) {
+      if (from[key].isObject()) {
         changes += merge(from[key],to[key]);
+      }
       else {
         if (from[key] != to[key]) {
           to[key] = from[key];
           changes += 1;
         }
       }
+    }
   }
   return changes;
 }
