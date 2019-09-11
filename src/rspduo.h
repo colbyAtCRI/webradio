@@ -39,6 +39,9 @@ class RSPduo : public WebSocketCustomer
   pthread_mutex_t     mLock; // every radio must have it's own mutex
   int                 mFrameCounter;
   int                 mBuffCount;
+  bool                mGotOne;
+  string              mSertialNumber;
+  int                 mHardware;
 
   // Data Buffer hell
   std::queue<IQData*> mFree;
@@ -91,6 +94,7 @@ public:
   int     currentFrame();
 
 private:
+  void    takeFirst();
   void    postConfig();
   void    onBufferComplete();
   Value   getSDRplayDevices();

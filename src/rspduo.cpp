@@ -113,6 +113,7 @@ const string RSPduo::mIQDataChannel("iq-data");
 
 RSPduo::RSPduo(WebSocketServer *srv) : WebSocketCustomer(srv)
 {
+  mGotOne = false;
   mJSON.settings_["commentStyle"] = "None";
   mJSON.settings_["indentation"] = "";
   // Leaving this out caused much confusion, radome errors, and strange hangs
@@ -126,14 +127,17 @@ RSPduo::RSPduo(WebSocketServer *srv) : WebSocketCustomer(srv)
   static lws_protocols prot[] = {
     {mConfigChannel.c_str(), webserver_callback,0,0,0,(void*)this,0},
     {mIQDataChannel.c_str(), webserver_callback,0,0,0,(void*)this,0},
+    {"",NULL,0,0,0,NULL,0}
   };
+
   mProtocols.push_back(prot[0]);
   mProtocols.push_back(prot[1]);
-  //mProtocols.push_back(prot[2]);
+  mProtocols.push_back(prot[2]);
 
   mBufferPipe = new BufferPipe(this,(Action)&RSPduo::onBufferComplete);
   server()->add(mBufferPipe);
   server()->add(this);
+  takeFirst();
 }
 
 RSPduo::~RSPduo()
@@ -163,6 +167,38 @@ bool RSPduo::invaidDevT(mir_sdr_DeviceT *device, int found)
   return found < 0;
 }
 
+void RSPduo::takeFirst()
+{
+  mir_sdr_DeviceT devs[4];
+  int             found(-1);
+  int             maxCount(4);
+  mir_sdr_ErrT    ret;
+
+  if (mGotOne)
+    return;
+  initDevT(devs,found,maxCount);
+  while (invaidDevT(devs,found)) {
+    ret = mir_sdr_GetDevices(devs,(uint32_t*)&found,(uint32_t)maxCount);
+    if (ret) {
+      cout << errorStr(ret) << endl;
+    }
+  }
+  for (int n = 0; n < found; n++) {
+    if (devs[n].devAvail == 1) {
+      ret = mir_sdr_SetDeviceIdx(n);
+      if (ret) {
+        cout << errorStr(ret) << endl;
+        mGotOne = false;
+        return;
+      }
+      mGotOne        = true;
+      mCfg["selectedRadio"] = n;
+      mSertialNumber = devs[n].SerNo;
+      mHardware      = (int)devs[n].hwVer;
+    }
+  }
+}
+
 Value RSPduo::getSDRplayDevices()
 {
   Value           reply;
@@ -182,10 +218,10 @@ Value RSPduo::getSDRplayDevices()
   }
 
   for (int n = 0; n < found; n++) {
-    reply[n]["serial-number"] = devices[n].SerNo;
-    reply[n]["device-number"] = devices[n].DevNm;
+    reply[n]["serialNumber"] = devices[n].SerNo;
+    reply[n]["deviceNumber"] = devices[n].DevNm;
     reply[n]["availability"] = devices[n].devAvail;
-    reply[n]["hardware-version"] = (int)devices[n].hwVer;
+    reply[n]["hardwareVersion"] = (int)devices[n].hwVer;
   }
   return reply;
 }
@@ -201,15 +237,15 @@ void RSPduo::openRadio(string sn, int hwVersion)
   Value radios = getSDRplayDevices();
   mir_sdr_ErrT rval;
   int nd(0);
-  radio["error-return"] = "radio not found";
+  radio["error"] = "radio not found";
   for (auto rad : radios) {
-    if (rad["serial-number"].asString() == sn) {
+    if (rad["serialNumber"].asString() == sn) {
       rval = mir_sdr_SetDeviceIdx(nd);
       radio = rad;
       radio["error"] = errorStr(rval);
       if (rval == mir_sdr_Success)
-        mCfg["selected-radio"] = nd;
-        mCfg["run-level"] = 1;
+        mCfg["selectedRadio"] = nd;
+        mCfg["runLevel"] = 1;
         initCfg(hwVersion);
         postConfig();
       break;
@@ -271,28 +307,7 @@ void RSPduo::processInput(lws *wsi, void *in, size_t len)
 
 void RSPduo::doRadio()
 {
-  switch (mCfg["run-level"].asInt()) {
-    // Startup, no radio selected. This is where and when the selection is
-    // made if the user set selected-radio sensibly
-    case 0: {
-      int radio(mCfg["selected-radio"].asInt());
-      Value radios(mCfg["radios"]);
-      if (radio >= 0 && radio < radios.size()) {
-        if (radios[radio]["availability"].asInt()) {
-          openRadio(radios[radio]["serial-number"].asString(),radios[radio]["hardware-version"].asInt());
-          if (mCfg["run-level"].asInt() == 1)
-            startStreamingThread();
-        }
-      }
-    }
-      break;
-    case 1:
-      startStreamingThread();
-      break;
-    case 2:
-      changeStreamingThread();
-      break;
-  }
+
 }
 
 // Called when changing radio settings. Like ports and filters
@@ -300,8 +315,8 @@ void RSPduo::doRadio()
 int RSPduo::changeRadioSettings()
 {
   int errCount(0);
-  int nd(mCfg["selected-radio"].asInt());
-  int hardware(mCfg["radios"][nd]["hardware-version"].asInt());
+  int nd(mCfg["selectedRadio"].asInt());
+  int hardware(mCfg["radios"][nd]["hardwareVersion"].asInt());
   check(mir_sdr_AgcControl(mir_sdr_AGC_DISABLE,0,0,0,0,0,mPar.mLNAstate));
 
   string ant(mCfg["antenna"].asString());
@@ -327,7 +342,7 @@ int RSPduo::changeRadioSettings()
     check(mir_sdr_AmPortSelect(1));
   }
 
-  if (mCfg["sync-out"].asString() == "ON") {
+  if (mCfg["syncOut"].asString() == "ON") {
     if (hardware == 3) {
        check(mir_sdr_rspDuo_ExtRef(1));
     }
@@ -345,7 +360,7 @@ int RSPduo::changeRadioSettings()
   }
 
   if (hardware == 2) {
-     if (mCfg["notch-filter"].asString() == "ON") {
+     if (mCfg["notchFilter"].asString() == "ON") {
        check(mir_sdr_RSPII_RfNotchEnable(1));
      }
      else {
@@ -365,31 +380,31 @@ void RSPduo::RadioParameters::unpackParams(JConfig cfg)
 {
     int fakeReason(0);
 
-    mFsMHz = cfg["sample-rate-MHz"].asDouble();
-    if (cfg.changes()["sample-rate-MHz"].asBool())
+    mFsMHz = cfg["sampleRateMHz"].asDouble();
+    if (cfg.changes()["sampleRateMHz"].asBool())
       fakeReason |= (int)mir_sdr_CHANGE_FS_FREQ;
 
-    mFrMHz = cfg["center-frequency-MHz"].asDouble();
-    if (cfg.changes()["center-frequency-MHz"].asBool())
+    mFrMHz = cfg["centerFrequencyMHz"].asDouble();
+    if (cfg.changes()["centerFrequencyMHz"].asBool())
       fakeReason |= (int)mir_sdr_CHANGE_RF_FREQ;
 
-    mBwType = (mir_sdr_Bw_MHzT)cfg["bandwidth-kHz"].asInt();
-    if (cfg.changes()["bandwidth-kHz"].asBool())
+    mBwType = (mir_sdr_Bw_MHzT)cfg["bandwidth_kHz"].asInt();
+    if (cfg.changes()["bandwidth_kHz"].asBool())
       fakeReason |= (int)mir_sdr_CHANGE_BW_TYPE;
 
-    mIfType = (mir_sdr_If_kHzT)cfg["IF-kHz"].asInt();
+    mIfType = (mir_sdr_If_kHzT)cfg["IFkHz"].asInt();
     if (cfg.changes()["IF-kHz"].asBool())
       fakeReason |= (int)mir_sdr_CHANGE_IF_TYPE;
 
-    mLoMode = (mir_sdr_LoModeT)cfg["lo-mode"].asInt();
-    if (cfg.changes()["lo-mode"].asBool())
+    mLoMode = (mir_sdr_LoModeT)cfg["loMode"].asInt();
+    if (cfg.changes()["loMode"].asBool())
       fakeReason |= (int)mir_sdr_CHANGE_LO_MODE;
 
     mReasons = (mir_sdr_ReasonForReinitT) fakeReason;
 
-    mGRdB     = cfg["gain-reduction"]["IF"].asInt();
-    mLNAstate = cfg["gain-reduction"]["LNA"].asInt();
-    mGrMode   = (mir_sdr_SetGrModeT)cfg["gain-set-mode"].asInt();
+    mGRdB     = cfg["gainReduction"]["IF"].asInt();
+    mLNAstate = cfg["gainReduction"]["LNA"].asInt();
+    mGrMode   = (mir_sdr_SetGrModeT)cfg["gainSetMode"].asInt();
 }
 
 // Called when changing from run-level 1 -> 2.
@@ -463,14 +478,14 @@ bool RSPduo::protocolInit(lws *wsi)
     // is selected will deselect the radio freeing it for use
     // by others. If changed to a valid index, a new radio is
     // selected.
-    mCfg["selected-radio"] = -1;
-    mCfg["run-level"] = 0;
+    mCfg["selectedRadio"] = -1;
+    mCfg["runLevel"] = 0;
     // Prevent browser user from merging over these. Note that
     // this removes keys independent of where in the JSON they
     // appear. Since we're only using it for top level keys
     // that don't appear anywhere else it's fine.
     mCfg.protect("radios");
-    mCfg.protect("run-level");
+    mCfg.protect("runLevel");
   }
   return true;
 }
@@ -482,23 +497,23 @@ string RSPduo::configAsString()
 
 void RSPduo::initCfg(int hw)
 {
-  mCfg["center-frequency-MHz"] = (double)5.0;
-  mCfg["sample-rate-MHz"] = (double)2.048;
-  mCfg["gain-reduction"]["IF"] = 20;
-  mCfg["gain-reduction"]["LNA"] = 0;
+  mCfg["centerFrequencyMHz"] = (double)5.0;
+  mCfg["sampleRateMHz"] = (double)2.048;
+  mCfg["gainReduction"]["IF"] = 20;
+  mCfg["gainReduction"]["LNA"] = 0;
   mCfg["correction"]["IQ"] = "ON";
   mCfg["correction"]["DC"] = "ON";
   mCfg["correction"]["PPM"] = 0.0;
   if (hw == 3) {
-    mCfg["tuner-port"] = 1;
+    mCfg["tunerPort"] = 1;
   }
   mCfg["antenna"] = "A";
-  mCfg["sync-out"] = "OFF";
+  mCfg["syncOut"] = "OFF";
   mCfg["biasT"] = "OFF";
-  mCfg["bandwidth-kHz"] = 1536;
-  mCfg["IF-kHz"] = 0;
-  mCfg["gain-set-mode"] = (int)mir_sdr_USE_RSP_SET_GR;
-  mCfg["lo-mode"] = (int)mir_sdr_LO_Auto;
+  mCfg["bandwidth_kHz"] = 1536;
+  mCfg["IFkHz"] = 0;
+  mCfg["gainSetMode"] = (int)mir_sdr_USE_RSP_SET_GR;
+  mCfg["loMode"] = (int)mir_sdr_LO_Auto;
 }
 
 Value cfgSchema()

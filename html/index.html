@@ -5,9 +5,12 @@
      <script href="src/plotter.js"></script>
    </head>
 	<body>
+    <center>
+    <h1>Web Radio</h1>
+  </center>
 		<br>
 		<br>
-		<textarea id=r readonly cols=140 rows=80></textarea><br>
+		<textarea id=r readonly cols=140 rows=10></textarea><br>
 		<input type="text" id=m cols=40 rows=1>
 		<button id=b onclick="sendmsg();">Send</button>
       <br>
@@ -59,8 +62,11 @@ try {
 	}
 
 	ws.onmessage =function got_packet(msg) {
+    var cfg = JSON.parse(msg.data);
 		document.getElementById("r").value =
-			document.getElementById("r").value + msg.data + "\n";
+			document.getElementById("r").value + "Run Level: " + cfg.runLevel + "\n"
+      + "Selected Radio: " + cfg.selectedRadio + "\n"
+      + "Serial Number: " + cfg.radios[0].serialNumber + "\n";
 		document.getElementById("r").scrollTop =
 			document.getElementById("r").scrollHeight;
 	}

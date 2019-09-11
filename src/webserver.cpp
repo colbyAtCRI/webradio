@@ -7,6 +7,7 @@ static int interrupted(0);
 void sigint_handler(int sig)
 {
   interrupted = 1;
+  cout << "Server interrupted : " << sig << endl;
 }
 
 Device::Device(WebSocketCustomer *customer, Action act)
@@ -93,19 +94,23 @@ int webserver_callback(lws *wsi,
   WebSocketCustomer *radio = (WebSocketCustomer*)lws_get_protocol(wsi)->user;
   switch (reason) {
     case LWS_CALLBACK_PROTOCOL_INIT:
-      cout << radio->getProtocol(wsi) << endl;
+      cout << "LWS_CALLBACK_PROTOCOL_INIT : " << radio->getProtocol(wsi) << endl;
       radio->protocolInit(wsi);
       break;
     case LWS_CALLBACK_ESTABLISHED:
+      cout << "LWS_CALLBACK_ESTABLISHED : " << radio->getProtocol(wsi) << endl;
       radio->established(wsi);
       break;
     case LWS_CALLBACK_CLOSED:
+      cout << "LWS_CALLBACK_CLOSED : " << radio->getProtocol(wsi) << endl;
       radio->closeConnection(wsi);
       break;
     case LWS_CALLBACK_SERVER_WRITEABLE:
+      cout << "LWS_CALLBACK_SERVER_WRITEABLE : " << radio->getProtocol(wsi) << endl;
       radio->processOutput(wsi);
       break;
     case LWS_CALLBACK_RECEIVE:
+      cout << "LWS_CALLBACK_RECEIVE : " << radio->getProtocol(wsi) << endl;
       radio->processInput(wsi,in,len);
       break;
     default:
@@ -221,12 +226,9 @@ void WebSocketServer::run()
 {
   int nerr(0);
   configure();
-  cout << "running xx" << endl;
   while (nerr >= 0 && !interrupted) {
     // Do all the websocket servicing
-    cout << "nerr = " << nerr << endl;
     nerr = lws_service(mContext,1000);
-    cout << "nerr = " << nerr << endl;
     // For radio hardware it is typical for IQ data to be collected in
     // frames in a collection thread or by monitoring data on USB devices.
     // which are not websockets. A Radio class will register these file
@@ -235,10 +237,12 @@ void WebSocketServer::run()
     for (auto dev : mDevice)
       if (dev->dataReady())
         dev->processInput();
-    cout << "still" << endl;
   }
-  cout << "done" << endl;
-  cout << endl;
+  if (interrupted && nerr == 0)
+    cout << "Server Interrupted Gracefully" << endl;
+
+  if (nerr > 0)
+    cout << "Server Due to Error : " << nerr << endl;
 }
 
 void WebSocketServer::sendAllChannels(string name, string data)

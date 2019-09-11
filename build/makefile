@@ -8,7 +8,7 @@ rspduo: $(OBJ)
 	c++ -o rspduo $(OBJ) -lpthread -lwebsockets -ljsoncpp -lfftw3 -lmirsdrapi-rsp
 
 clean:
-	@rm -f *.o *.d
+	@rm -f *.o *.d *.log rspduo
 
 %.o:%.cpp
 	c++ -c $(CFLAGS) $(INC) $^
