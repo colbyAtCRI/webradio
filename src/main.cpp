@@ -1,15 +1,13 @@
-#include "rspduo.h"
+#include "sdrplay.h"
+#include "webserver.h"
+#include <iostream>
+using namespace std;
 
+#define checkAPI(x) {mir_sdr_ErrT e; if ((e = (x))) cout << #x << ": " << (int)e << endl;}
 int
 main(int argc, char *argv[])
 {
-  if (fork() == 0) {
-    fclose(stdin);
-    freopen("server.log","a+",stdout);
-    freopen("error.log","a+",stderr);
-    WebSocketServer server("../html/",1535);
-    RSPduo radio(&server);
-    server.run();
-  }
+  WebSocketServer server("/Users/paulcolby/Projects/webradio/html",8000);
+  server.run();
   return 0;
 }
