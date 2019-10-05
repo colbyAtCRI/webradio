@@ -1,4 +1,21 @@
-.plotter {
-  width : 800;
-  height : 300;
+body {
+  background-color: powderblue;
+}
+
+h1 {
+  color: blue;
+}
+
+table {
+  border-width: medium;
+  border-style: solid;
+}
+
+tr {
+    font-size: 26;
+    border-bottom-style: solid;
+}
+
+td {
+  font-size: 20;
 }

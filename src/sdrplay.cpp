@@ -1,4 +1,5 @@
 #include "sdrplay.h"
+#include <iostream>
 #include <sstream>
 
 void streamCallback(short   *xi,
@@ -137,6 +138,38 @@ void SDRPlay::startStreamingThread()
                            &gainCallback,
                            (void*)this);
   mRunning = (ret == mir_sdr_Success);
+}
+
+void Words::split(string cmd) {
+  static string delim(" ,");
+  bool inword(false);
+  string word;
+  clear();
+  for (auto c = cmd.begin(); c != cmd.end(); c++) {
+    if (delim.find(*c) == string::npos) {
+      word += *c;
+      inword = true;
+    }
+    else {
+      if (inword) {
+        push_back(word);
+        word.clear();
+        inword = false;
+      }
+    }
+  }
+  if (!word.empty())
+    push_back(word);
+}
+
+string SDRPlay::command(string cmd)
+{
+  Words wrds(cmd);
+  if (wrds.empty())
+    return "";
+  if (wrds[0] == "frequency") {
+  }
+  return wrds[0];
 }
 
 Catalog::Catalog() : maxCount(4)

@@ -7,7 +7,12 @@ using namespace std;
 int
 main(int argc, char *argv[])
 {
-  WebSocketServer server("/Users/paulcolby/Projects/webradio/html",8000);
+  //Words wrds;
+  //wrds.split("frequency 30.0,66 ");
+  //for (auto w = wrds.begin(); w != wrds.end(); w++)
+  //  cout << *w << endl;
+  //return 0;
+  WebSocketServer server("/Users/paul/Projects/webradio/html",8000);
   server.run();
   return 0;
 }

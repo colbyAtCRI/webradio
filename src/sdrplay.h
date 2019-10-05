@@ -7,6 +7,17 @@
 using namespace std;
 using namespace Json;
 
+struct Words : vector<string>
+{
+  Words() {
+
+  }
+  Words(string str) {
+    split(str);
+  }
+  void split(string cmd);
+};
+
 class Catalog : public vector<mir_sdr_DeviceT>
 {
 public:
@@ -72,7 +83,7 @@ public:
         return "unknown";
     }
   }
-  string command(string cmd) { return cmd; }
+  string command(string cmd);
   string config();
   operator int() { return mIdx > -1; }
   void startStreamingThread();
