@@ -36,7 +36,7 @@ and done the required .bashrc/.profile mods needed to make everything python tra
 This server uses the following:
 
 - Python 3
-- [SDRpaly API](https://sdrplay.com) for the platform running WebRadio 
+- [SDRPlay API](https://sdrplay.com) for the platform running WebRadio 
 - [SoapySDR](https://github.com/pothosware/SoapySDR)  python support
 - [SoapySDRPlay3](https://github/pothosware/SoapySDRPlay3)
 - [SoaptRLTSDR](https://github.com/pothosware/SoapyRTLSDR)
@@ -62,6 +62,7 @@ In a word, there currently is none. It could be added. I see the main use case o
 as operating behind a firewall on a local network so security seems not needed. I could be
 wrong. In any case, I do not recommend letting WebRadio be on the Web at large.
 
+
 ## SoapySRD installation
 
 The SoapySDR build insists on installing the python support to /usr/local which doesn't 
@@ -69,6 +70,28 @@ help with a virtual environment at least on the way I have things configured. I'
 moved `_SoapySDR.so` and `SoapySDR.py` to a directory, `site-packages/sopay_sdr`, in 
 my python search path. In any event, one must be able to `from soapy_sdr import SoapySDR`
 from the python prompt.  
+
+# Running WebRadio
+
+Once installed, run server.py from a command line. In a browser enter the address,
+
+`<ip-address>:5000`
+
+where `<ip-address>` is either `localhost` if you are on the server or, if you are on a 
+different machine than the server, the ip address of the server. A page listing the 
+available hardware currently plugged into the server that looks something like,
+
+![Available Radios](imp/radios.png)
+
+This shows that there are two radios connected to the server. The first is a R820T style
+rtl-sdr while the second is an SDRPlay RSPduo which shows up as 4 devices, one device 
+per operating mode. 
+
+To select and claim a device, highlight the device and press the open button. This will 
+load a the main WebRadio page for the selected device. 
+
+## Frequency Navigation 
+
 
 ## Current Limitations
 
