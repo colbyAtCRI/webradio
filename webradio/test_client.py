@@ -51,7 +51,6 @@ def fm1049():
 def bye():
     sio.disconnect()
 
-
 def plot():
     fstart = data.spectrum.fstart
     fend = data.spectrum.fend
@@ -99,4 +98,4 @@ def on_data(q1, q2, q3):
 
 
 def connect():
-    sio.connect("http://192.168.1.137:5000")
+    sio.connect("http://localhost:5000")
