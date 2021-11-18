@@ -1,0 +1,15 @@
+
+.center {
+   position: relative;
+   width: fit-content;
+   left: 50%;
+   transform: translateX(-50%);
+}
+.radio-select {
+   position:relative;
+   width:fit-content;
+   left: 50%;
+   transform:translateX(-50%);
+   font-size: 1.5rem;
+}
+

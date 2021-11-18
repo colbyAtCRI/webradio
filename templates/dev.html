@@ -1,0 +1,321 @@
+<html>
+   <head>
+      <title>WebRadio</title>
+      <script src='/static/node_modules/socket.io/client-dist/socket.io.js'></script>
+      <script src='/static/node_modules/jquery/dist/jquery.js'></script>
+      <script src='/static/plot.js'></script>
+      <script src='/static/controls.js'></script>
+      <script src='/static/pcm-player.js'></script>
+      <script src='/static/digit-box.js'></script>
+      <link rel='stylesheet' href='/static/css/dev.css'>
+      <link rel='shortcut icon' href='#'>
+      <script type='text/javascript'>
+         const myRadio = '{{myRadio}}';
+         const socket = io();
+         function apply(co) {
+            socket.emit('apply',co);
+         }
+         // I'm set once on the claim event
+         var hardware;
+         window.onbeforeunload = function()
+         {
+            soket.emit('disconnect');
+         };
+         function fm(freq)
+         {
+            let co = new ChangeOrder();
+            co.radio.tunerFreq = freq * 1000000;
+            co.radio.centerFreq = (freq - 0.1) * 1000000;
+            co.radio.modem_type = 'FMS';
+            apply(co);
+         }
+      </script>
+   </head>
+   <body>
+      <h1 align='center'i id='banner'>Test Page</h1>
+      <div id='main-display'>
+         <div class='button-box'>
+            <button type='button' class='modem-select'>AM</button>
+            <button type='button' class='modem-select'>NBFM</button>
+            <button type='button' class='modem-select'>WBFM</button>
+            <button type='button' class='modem-select'>FMS</button>
+            <button type='button' class='modem-select'>LSB</button>
+            <button type='button' class='modem-select'>USB</button>
+            <button type='button' class='modem-select'>CW</button>
+         </div>
+         <div class='spectrum-display'>
+            <canvas id='spectrum'></canvas>
+            <table id='overlay'>
+               <tr>
+                  <td style='text-align:right'>AN:</td>
+                  <td id='antenna' class='setting'></td>
+               </tr>
+               <tr>
+                  <td style='text-align:right'>SR:</td>
+                  <td id='sample-rate' class='setting'></td>
+               </tr>
+               <tr>
+                  <td style='text-align:right'>BW:</td>
+                  <td id='bandwidth' class='setting'></td>
+               </tr>
+               <tr>
+                  <td style='text-align:right'>GS:</td>
+                  <td id='gain-select' class='setting'></td>
+               </tr>
+            </table>
+            <!-- Put the option-overlays here on top of the overlay -->
+            <div id='option-overlay'></div>
+            <div id='rescale-min' class='active-area'></div>
+            <div id='upper-right' class='active-area'></div>
+            <div id='center-top' class='active-area'></div>
+            <div id='lower-left' class='active-area'></div>
+            <div class='band-select'>
+               <span class='band-button'>MW</span>
+               <span class='band-button'>160M</span>
+               <span class='band-button'>80M</span>
+               <span class='band-button'>40M</span>
+               <span class='band-button'>20M</span>
+               <span class='band-button'>17M</span>
+               <span class='band-button'>15M</span>
+               <span class='band-button'>12M</span>
+               <span class='band-button'>10M</span>
+               <span class='band-button'>6M</span>
+               <span class='band-button'>2M</span>
+               <span class='band-button'>1.25M</span>
+               <span class='band-button'>70CM</span>
+               <span class='band-button'>33CM</span>
+               <span class='band-button'>23CM</span>
+            </div>
+         </div>
+      </div>
+      <p>
+      <section class='control-box'>
+         <button type='button' id='tuner-lock' class='control-button'>T</button>
+         <div class='digit-box' id='tunerfreq'></div>
+         <button id='mute' type='button' class='control-button'>M</button>
+      </section>
+      <script type='text/javascript'>
+         $('.band-button').on('click',function() 
+         {
+            var co = new ChangeOrder();
+            switch(this.innerHTML) {
+               case 'MW':
+                  co.radio.tunerFreq = 1000000;
+                  co.radio.modem_type = 'AM';
+               break;
+               case '160M':
+                  co.radio.tunerFreq = 1900000;
+                  co.radio.modem_type = 'LSB';
+               break;
+               case '80M':
+                  co.radio.tunerFreq = 3750000;   
+                  co.radio.modem_type = 'LSB';
+               break;
+               case '40M':
+                  co.radio.tunerFreq = 7100000;
+                  co.radio.modem_type = 'LSB';
+               break;
+               case '20M':
+                  co.radio.tunerFreq = 14150000;
+                  co.radio.modem_type = 'USB';
+               break;
+               case '17M':
+               break;
+               case '15M':
+               break;
+               case '12M':
+               break;
+               case '10M':
+               break;
+               case '6M':
+               break;
+               case '2M':
+               break;
+               case '1.25M':
+               break;
+            }
+            apply(co);
+         });
+         // Tuner Lock button
+         $('#tuner-lock').each(function()
+         {
+            this.innerHTML = 'T';
+            this.style.backgroundColor = '#4B0082';
+            this.style.color = 'white';
+         });
+         $('#tuner-lock').on('click',function()
+         {
+            let co = new ChangeOrder();
+            if (this.innerHTML === 'C') {
+               this.innerHTML = 'T';
+               this.style.backgroundColor = '#4B0082';
+               spectrumDisplay.cursorColor = '#FF0000';
+            }
+            else {
+               this.innerHTML = 'C';
+               this.style.backgroundColor = '#8D38C9';
+               spectrumDisplay.cursorColor = '#00FF00';
+            }
+            // force an update or status event
+            socket.emit('apply',co);
+         });
+         // Tuner or Cursor control spin box
+         var tunerControl = new DigitBox($('#tunerfreq')[0],10);
+         tunerControl.onchange(function(value)
+         {
+            let co = new ChangeOrder();
+            if ($('#tuner-lock')[0].innerHTML === 'T')
+               co.radio.tunerFreq = value;
+            else
+               co.radio.centerFreq = value;
+            socket.emit('apply',co);
+         });
+         var audioOut = new PCMPlayer();
+         // Spectrum UI 
+         const spectrumDisplay = new SpectrumDisplay($('#spectrum')[0]);
+         $('#spectrum').on('mousemove',function(evnt)
+         {
+            spectrumDisplay.cursor = evnt.offsetX;
+         });
+         $('#spectrum').on('mouseleave',function()
+         {
+            spectrumDisplay.cursor = -100;
+         });
+         $('#spectrum').on('click',function()
+         {
+            var co = new ChangeOrder();
+            var fr = spectrumDisplay.cursorFreq();
+            if ($('#tuner-lock')[0].innerHTML === 'T')
+               co.radio.tunerFreq = 1000*Math.floor(fr/1000);
+            else
+               co.radio.centerFreq = 1000*Math.floor(fr/1000);
+            socket.emit('apply',co);
+         });
+         // Modem Button
+         $('.modem-select').click(function()
+         {
+            for (let n = 0; n < $('.modem-select').length; n++)
+               $('.modem-select')[n].style.backgroundColor = 'white';
+            this.style.backgroundColor = 'yellow';
+            let co = new ChangeOrder();
+            co.radio.modem_type = this.innerHTML;
+            socket.emit('apply',co);
+         });
+         function updateModem(stat)
+         {
+           $('.modem-select').each(function()
+            {
+               if (this.innerHTML === stat.modem.modem_type)
+                  this.style.backgroundColor = 'yellow';
+               else
+                  this.style.backgroundColor = 'white';
+            });
+         } 
+         // Mute Button
+         $('#mute').each(function()
+         {
+            this.style.backgroundColor = 'red';
+            this.innerHTML = 'M';
+         });
+         $('#mute').on('click', function()
+         {
+            if (this.innerHTML === 'P') {
+               this.style.backgroundColor = 'red';
+               this.innerHTML = 'M';
+            }
+            else {
+               this.style.backgroundColor = 'lightgreen';
+               this.innerHTML = 'P';
+            }
+         });
+         // Update UI status after change order
+         function statusUpdate(stat)
+         {
+            console.log(stat);
+            if ($('#tuner-lock')[0].innerHTML === 'T')
+               tunerControl.setValue(stat.radio.tunerFreq);
+            else
+               tunerControl.setValue(stat.radio.centerFreq);
+            updateModem(stat);
+            $('#antenna').each(function()
+            {
+               this.innerHTML = stat.radio.antenna;
+            });
+            $('#sample-rate').each(function()
+            {
+               this.innerHTML = stat.radio.sampleRate;
+            });
+            $('#bandwidth').each(function() 
+            {
+               this.innerHTML = stat.radio.bandwidth;
+            });
+            $('#gain-select').each(function()
+            {
+                this.innerHTML = stat.radio.settings[0].value;
+            });
+         }
+         // Trigger a rescale minimum dB on next data event 
+         $('#rescale-min').on('click',function()
+         {
+            spectrumDisplay.rescaleMin();
+         });
+         // respond to statusUpdates
+         socket.on('status',stat => statusUpdate(stat));
+         // Process all dynamic UI effects
+         function processData(radio,spectrum,audioPCM)
+         {
+            radio.spectrum.data = new Float32Array(spectrum);
+            radio.modem.pcm = new Float32Array(audioPCM);
+            if ($('#mute')[0].innerHTML === 'P')
+               audioOut.play(radio);
+            spectrumDisplay.plot(radio);
+         }
+         socket.on('data',(radio,spectrum,audio) => processData(radio,spectrum,audio));
+         // Claim radio selected
+         function onClaim(stat) 
+         {
+            $('#banner')[0].innerHTML = stat.hardware.key;
+            // deal with rsp2 and rspduo differences. A gain
+            // sel of '0' is the default which is kinda hot
+            // for the rsp2.
+            if (stat.hardware.key === 'RSP2') {
+               let co = new ChangeOrder();
+               co.radio.settings.rfgain_sel = '4';
+               apply(co);
+            }
+            hardware = stat.hardware;
+            new addOptionBox('antenna',hardware.antennas,function(ant)
+            {
+                let co = new ChangeOrder();
+                co.radio.antenna = ant;
+                apply(co);
+            });
+            new addOptionBox('sample-rate',hardware.sampleRates,function(sr)
+            {
+                let co = new ChangeOrder();
+                co.radio.sampleRate = sr;
+                apply(co);
+            });
+            new addOptionBox('gain-select',stat.radio.settings[0].options,function(gn)
+            {
+                let co = new ChangeOrder();
+                co.radio.settings[stat.radio.settings[0].key] = gn;
+                apply(co);
+            });
+         }
+         $(document).ready(function() {
+            socket.emit('claim',myRadio,audioOut.audio_sr,onClaim);
+            // Start with something pleasent 
+            let co = new ChangeOrder();
+            co.radio.tunerFreq = 7150000;
+            co.radio.modem_type = 'LSB';
+            socket.emit('apply',co);
+         });
+        new addOptionBox('lower-left',[100000,50000,25000,20000,10000],function(val)
+        {
+            spectrumDisplay.xtic = val;
+        });
+      </script>
+   </body>
+   
+</html>

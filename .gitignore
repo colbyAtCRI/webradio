@@ -1,0 +1,5 @@
+*.o
+*.d
+__pycache__
+
+bower_components/

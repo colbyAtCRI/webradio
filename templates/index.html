@@ -1,0 +1,40 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+   <title>Available Radios</title>
+   <link rel='stylesheet' href='/static/css/radio-select.css'>
+</head>
+<body>
+   <h1 class='center'>Avaliable Radios</h1>
+<div class='radio-select'>
+{% for n in indexs %}
+   <p>
+   <input name='radio' value='{{n}}' type='radio'>
+   {{radioList[n]['label']}}
+   </input>
+{% endfor %}
+</div>
+<div class='center'>
+   <button type='button' id='open'> Open </button>
+</div>
+<script type='text/javascript'>
+   var openButton = document.getElementById('open');
+   function getSelectedRadio()
+   {
+      var lst = document.getElementsByName('radio');
+      for (let n = 0; n < lst.length; n++) {
+         if (lst[n].checked)  {
+            return lst[n].value;
+         }
+      }
+   }
+   function start_radio()
+   {
+      var name = getSelectedRadio();
+      window.open('/radio/'+name,'_self');
+   }
+   openButton.addEventListener('click',()=>start_radio());
+</script>
+</body>
+</html>
+

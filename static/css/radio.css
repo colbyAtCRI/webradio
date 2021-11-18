@@ -1,0 +1,52 @@
+
+body {
+   margin-left: 5%;
+   margin-right: 5%;
+}
+
+nav {
+   font-size: 2rem;
+   display: grid;
+   grid-template-columns: min-content min-content min-content min-content;
+   grid-template-rows: auto;
+   grid-column-gap: 30px;
+}
+
+#spectrum {
+   border: 7px solid #000000;
+}
+
+#rf-power-meter {
+   width: 200px;
+   min: -130;
+   max: -30;
+}
+
+#tuner-control
+{
+   width: 100%;
+   height: 50px;
+}
+
+.dropdown 
+{
+   padding: 5px;
+   background: white;
+   border-width: thick;
+   border-style: solid;
+   border-color: orange;
+   border-radius: 20px;
+   display: none;
+   position: absolute;
+   width: auto;
+   overflow: auto;
+}
+
+.control
+{
+   padding: 3px;
+   width: max-content;
+   border-style: none;
+   font-size: 1.5rem;
+   color: green;
+}
