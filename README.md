@@ -81,7 +81,7 @@ where `<ip-address>` is either `localhost` if you are on the server or, if you a
 different machine than the server, the ip address of the server. A page listing the 
 available hardware currently plugged into the server that looks something like,
 
-![Available Radios](imp/radios.png)
+![Available Radios](img/radios.png)
 
 This shows that there are two radios connected to the server. The first is a R820T style
 rtl-sdr while the second is an SDRPlay RSPduo which shows up as 4 devices, one device 
