@@ -14,7 +14,7 @@ function MeterDisplay(id_canvas)
     this.a1 = Math.PI - this.a2;
     this.Rd = this.Rm - 50;
     this.ticLength = 20;
-    this.needleWidth = 1;
+    this.needleWidth = 2;
     this.scaleWidth = 2;
 }
 
