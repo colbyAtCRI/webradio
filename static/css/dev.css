@@ -25,6 +25,14 @@ body {
    border: none;
 }
 
+#rf-power {
+    width: 300;
+    height: 100;
+    border: 10px solid orange;
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+
 .spectrum-display {
    position: relative;
    height: 512px;

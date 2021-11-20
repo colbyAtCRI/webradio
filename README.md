@@ -38,7 +38,7 @@ This server uses the following:
 - Python 3
 - [SDRPlay API](https://sdrplay.com) for the platform running WebRadio 
 - [SoapySDR](https://github.com/pothosware/SoapySDR)  python support
-- [SoapySDRPlay3](https://github/pothosware/SoapySDRPlay3)
+- [SoapySDRPlay3](https://github.com/pothosware/SoapySDRPlay3)
 - [SoaptRLTSDR](https://github.com/pothosware/SoapyRTLSDR)
 - requests (pip install requests)
 - Flask (pip install flask)

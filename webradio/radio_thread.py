@@ -181,6 +181,8 @@ class Radio:
                 self.radio.setBandwidth(RX, 0, rc.bandwidth)
             if rc.iqdatalength:
                 self.config.iqdatalength = rc.iqdatalength
+            if rc.frameRate:
+                self.config.frameRate = rc.frameRate
             if rc.gainMode is not None:
                 self.radio.setGainMode(RX, 0, rc.gainMode)
             if rc.gain:
@@ -215,7 +217,6 @@ class Radio:
         data = JavaDict()
         data.radio = self.config
         data.spectrum = self.spectrum.config
-        # data.tuner = self.tuner.config
         data.modem = self.modem.config
         return data
 

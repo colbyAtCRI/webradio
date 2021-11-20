@@ -7,6 +7,8 @@
       <script src='/static/controls.js'></script>
       <script src='/static/pcm-player.js'></script>
       <script src='/static/digit-box.js'></script>
+      <script src='/static/power-monitor.js'></script>
+      <script src='/static/meters.js'></script>
       <link rel='stylesheet' href='/static/css/dev.css'>
       <link rel='shortcut icon' href='#'>
       <script type='text/javascript'>
@@ -33,6 +35,9 @@
    </head>
    <body>
       <h1 align='center'i id='banner'>Test Page</h1>
+      <nav>
+        <canvas id='rf-power'></canvas> 
+      </nav>
       <div id='main-display'>
          <div class='button-box'>
             <button type='button' class='modem-select'>AM</button>
@@ -95,6 +100,7 @@
          <button id='mute' type='button' class='control-button'>M</button>
       </section>
       <script type='text/javascript'>
+         var powerMeter = new PeakPowerMonitor('rf-power');
          $('.band-button').on('click',function() 
          {
             var co = new ChangeOrder();
@@ -269,6 +275,7 @@
             if ($('#mute')[0].innerHTML === 'P')
                audioOut.play(radio);
             spectrumDisplay.plot(radio);
+            powerMeter.process(radio);
          }
          socket.on('data',(radio,spectrum,audio) => processData(radio,spectrum,audio));
          // Claim radio selected
