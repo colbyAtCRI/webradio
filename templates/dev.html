@@ -36,7 +36,8 @@
    <body>
       <h1 align='center'i id='banner'>Test Page</h1>
       <nav>
-        <canvas id='rf-power'></canvas> 
+        <canvas id='rf-power' class='meter'></canvas> 
+        <canvas id='s-meter' class='meter'></canvas>
       </nav>
       <div id='main-display'>
          <div class='button-box'>
@@ -100,7 +101,7 @@
          <button id='mute' type='button' class='control-button'>M</button>
       </section>
       <script type='text/javascript'>
-         var powerMeter = new PeakPowerMonitor('rf-power');
+         var powerMeter = new PeakPowerMonitor('rf-power','s-meter');
          $('.band-button').on('click',function() 
          {
             var co = new ChangeOrder();
@@ -272,10 +273,10 @@
          {
             radio.spectrum.data = new Float32Array(spectrum);
             radio.modem.pcm = new Float32Array(audioPCM);
-            if ($('#mute')[0].innerHTML === 'P')
+            powerMeter.process(radio);
+            if ($('#mute')[0].innerHTML === 'P' && !powerMeter.meter.isSquelched)
                audioOut.play(radio);
             spectrumDisplay.plot(radio);
-            powerMeter.process(radio);
          }
          socket.on('data',(radio,spectrum,audio) => processData(radio,spectrum,audio));
          // Claim radio selected

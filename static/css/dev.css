@@ -25,7 +25,7 @@ body {
    border: none;
 }
 
-#rf-power {
+.meter {
     width: 300;
     height: 100;
     border: 10px solid orange;

@@ -11,15 +11,6 @@ function LinearTransform(x1,x2,y1,y2)
    };
 }
 
-function LinearMap(x1,x2,y1,y2)
-{
-   return function(array) {
-      let a = (y1-y2)/(x1-x2);
-      let b = (x2*y1-x1*y2)/(x1-x2);
-      return array.map(x => a*x-b);
-   };
-}
-
 function FFTFrequency(N)
 {
    let rng = [];

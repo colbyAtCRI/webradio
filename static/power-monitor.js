@@ -10,9 +10,10 @@ function dBtoPower(dB)
 // meter_id is the id of a meter tag
 // Okay, meter tags suck. Would like a more analog radio 
 // look and feel.
-function PeakPowerMonitor(meter_id)
+function PeakPowerMonitor(meter_id,id_smeter)
 {
-    this.meter = new MeterDisplay(meter_id);
+    this.meter = new PowerMeter(meter_id,id_smeter);
+    this.smeter = new SMeter(id_smeter);
     this.rockBottom = -4000; // this is a lot in dB
     this.peak = [];
     this.average = [];
@@ -59,6 +60,7 @@ PeakPowerMonitor.prototype.process = function(data)
     }
     this.average[9] /= N; 
     this.meter.draw(this.peak[9]);
+    this.smeter.draw(this.peak[9] - this.average[9]);
     this.onPower(this.power,this.average);
     if ( this.variation() > this.threshold )
         this.onLevelChange();
