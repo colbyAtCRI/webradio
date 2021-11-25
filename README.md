@@ -97,11 +97,11 @@ load a the main WebRadio page for the selected device.
 The small circle on the RF power meter dial shows the current squelch setting which defaults to -120 dBm
 as shown in the image below, 
 
-![Power Meter Squelch](imp/powermeter1.png)
+![Power Meter Squelch](img/powermeter1.png)
 
 To set the squelch level one mouses over the meter dial. This brings up a green cursor,
 
-![Squelch Cursor](img/poqwermeter2.png)
+![Squelch Cursor](img/powermeter2.png)
 
 Select the desired squelch level by clicking,
 
