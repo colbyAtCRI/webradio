@@ -34,10 +34,13 @@
       </script>
    </head>
    <body>
-      <h1 align='center'i id='banner'>Test Page</h1>
+      <h1 align='center' id='banner'>WebRadio</h1>
+      <h2 align='center' id='hardware-key'></h2>
       <nav>
         <canvas id='rf-power' class='meter'></canvas> 
         <canvas id='s-meter' class='meter'></canvas>
+        <div id='box1' class='preset-button-box'></div>
+        <div id='box2' class='preset-button-box'></div>
       </nav>
       <div id='main-display'>
          <div class='button-box'>
@@ -75,23 +78,6 @@
             <div id='upper-right' class='active-area'></div>
             <div id='center-top' class='active-area'></div>
             <div id='lower-left' class='active-area'></div>
-            <div class='band-select'>
-               <span class='band-button'>MW</span>
-               <span class='band-button'>160M</span>
-               <span class='band-button'>80M</span>
-               <span class='band-button'>40M</span>
-               <span class='band-button'>20M</span>
-               <span class='band-button'>17M</span>
-               <span class='band-button'>15M</span>
-               <span class='band-button'>12M</span>
-               <span class='band-button'>10M</span>
-               <span class='band-button'>6M</span>
-               <span class='band-button'>2M</span>
-               <span class='band-button'>1.25M</span>
-               <span class='band-button'>70CM</span>
-               <span class='band-button'>33CM</span>
-               <span class='band-button'>23CM</span>
-            </div>
          </div>
       </div>
       <p>
@@ -101,48 +87,9 @@
          <button id='mute' type='button' class='control-button'>M</button>
       </section>
       <script type='text/javascript'>
+         var presetBox1 = new PresetButtons('box1',12,HamBands);
+         var presetBox2 = new PresetButtons('box2',12,FMStationPresets);
          var powerMeter = new PeakPowerMonitor('rf-power','s-meter');
-         $('.band-button').on('click',function() 
-         {
-            var co = new ChangeOrder();
-            switch(this.innerHTML) {
-               case 'MW':
-                  co.radio.tunerFreq = 1000000;
-                  co.radio.modem_type = 'AM';
-               break;
-               case '160M':
-                  co.radio.tunerFreq = 1900000;
-                  co.radio.modem_type = 'LSB';
-               break;
-               case '80M':
-                  co.radio.tunerFreq = 3750000;   
-                  co.radio.modem_type = 'LSB';
-               break;
-               case '40M':
-                  co.radio.tunerFreq = 7100000;
-                  co.radio.modem_type = 'LSB';
-               break;
-               case '20M':
-                  co.radio.tunerFreq = 14150000;
-                  co.radio.modem_type = 'USB';
-               break;
-               case '17M':
-               break;
-               case '15M':
-               break;
-               case '12M':
-               break;
-               case '10M':
-               break;
-               case '6M':
-               break;
-               case '2M':
-               break;
-               case '1.25M':
-               break;
-            }
-            apply(co);
-         });
          // Tuner Lock button
          $('#tuner-lock').each(function()
          {
@@ -282,7 +229,7 @@
          // Claim radio selected
          function onClaim(stat) 
          {
-            $('#banner')[0].innerHTML = stat.hardware.key;
+            $('#hardware-key')[0].innerHTML = stat.hardware.key;
             // deal with rsp2 and rspduo differences. A gain
             // sel of '0' is the default which is kinda hot
             // for the rsp2.

@@ -11,6 +11,33 @@ body {
    grid-template-rows: auto;
 }
 
+nav {
+    display: flex;
+}
+
+.preset-button-box {
+    display: grid;
+    grid-template-columns: auto auto auto auto;
+    width: 300;
+    height: 100;
+    border: 10px solid orange;
+    border-radius: 10px;
+    margin-right: 10px;
+}
+
+.preset-button {
+    text-align: center;
+    font-size: 15pt;
+    font-family: monospace;
+    border: 1px solid orange;
+    background: white;
+    padding: 3px;
+}
+
+.preset-button:hover {
+    background: lightgreen;
+}
+
 .button-box {
    display: grid;
    width: auto;
@@ -31,6 +58,7 @@ body {
     border: 10px solid orange;
     border-radius: 10px;
     margin-bottom: 10px;
+    margin-right: 10px;
 }
 
 .spectrum-display {
@@ -48,31 +76,6 @@ body {
 .active-area:hover {
    background: white;
    opacity: 0.5;
-}
-
-div.band-select {
-   display: flex;
-   position: absolute;
-   background:black;
-   top: 0%;
-   left: 0%;
-   width: fit-content;
-   opacity:0;
-}
-
-div.band-select:hover {
-   opacity:0.65;
-}
-
-span.band-button {
-   color: white;
-   font-size: 20pt;
-   font-family: monospace;
-   margin: 10pt;
-}
-
-span.band-button:hover {
-   color: red;
 }
 
 #rescale-min.active-area {

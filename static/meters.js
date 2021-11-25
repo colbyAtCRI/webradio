@@ -125,7 +125,7 @@ class Meter
 class SMeter extends Meter
 {
     constructor(id_canvas) {
-        let tics = [1,'1',2,'',3,'3',4,'',5,'5',6,'',7,'7',8,'',9,'9',12,'',15,'15',30,'30',60,'60'];
+        let tics = [.5,'',1,'1',2,'',3,'3',4,'',5,'5',6,'',7,'7',8,'',9,'9',12,'',15,'15',30,'30',60,'60'];
         super(id_canvas,'SM',tics,true);
     }
 }

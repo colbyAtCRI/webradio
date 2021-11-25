@@ -2,9 +2,82 @@ function ChangeOrder()
 {
    this.radio = {};
    this.radio.settings = {};
-   this.tuner = {};
    this.spectrum = {};
    this.modem = {};
+}
+
+function setTuner(tf,cf,modem)
+{
+    let co = new ChangeOrder();
+    co.radio.centerFreq = cf * 1000000;
+    co.radio.tunerFreq = tf * 1000000;
+    co.radio.modem_type = modem;
+    return co;
+}
+
+const FMStationPresets = {
+    '91.1'  : setTuner(91.1,91.0,'FMS'),
+    '92.3'  : setTuner(92.3,92.2,'FMS'),
+    '94.5'  : setTuner(94.5,94.4,'FMS'),
+    '95.7'  : setTuner(95.7,95.6,'FMS'),
+    '96.5'  : setTuner(96.5,96.4,'FMS'),
+    '105.3' : setTuner(105.3,105.2,'FMS'),
+    '107.3' : setTuner(107.3,107.2,'FMS'),
+    '105.7' : setTuner(105.7,105.6,'FMS'),
+    '99.7'  : setTuner(99.7,99.6,'FMS'),
+    '103.3' : setTuner(103.3,103.2,'FMS'),
+    '101.3' : setTuner(101.3,101.2,'FMS'),
+    '104.9' : setTuner(104.9,104.8,'FMS') 
+};
+
+
+const HamBands = {
+    'MW'   : setTuner(1.0,1.0,'AM'),
+    '160M' : setTuner(1.9,1.9,'LSB'),
+    '80M'  : setTuner(3.75,3.75,'LSB'),
+    '40M'  : setTuner(7.1,7.1,'LSB'),
+    '20M'  : setTuner(14.15,14.15,'USB'),
+    '17M'  : setTuner(18.1,18.1,'USB'),
+    '15M'  : setTuner(21.225,21.225,'USB'),
+    '12M'  : setTuner(24.95,24.95,'USB'),
+    '10M'  : setTuner(28.85,28.85,'USB'),
+    '6M'   : setTuner(52.0,52.0,'NBFM'),
+    '2M'   : setTuner(146.0,146.0,'NBFM'),
+    '1.25M': setTuner(223.5,223.5,'NBFM'),
+    '70CM' : setTuner(435.0,435.0,'NBFM'),
+    '33CM' : setTuner(915.0,915.0,'NBFM'),
+    '23CM' : setTuner(1270.0,1270.0,'NBFM')
+};
+
+function clearAllPreset()
+{
+    $('.preset-button').each(function()
+    {
+        this.style.color = 'black';
+    });
+}
+
+class PresetButtons
+{
+    constructor(id_bbox,NB,bands) {
+        this.box = document.getElementById(id_bbox);
+        this.label = Object.keys(bands);
+        this.bands = bands;
+        for (let k = 0; k < NB; k++) {
+            let bt = document.createElement('div');
+            bt.setAttribute('class','preset-button');
+            bt.innerHTML = (k < this.label.length)?this.label[k]:'-';
+            bt.onclick = function() 
+            {
+                clearAllPreset();
+                if (bands.hasOwnProperty(bt.innerHTML)) {
+                    apply(bands[bt.innerHTML]);
+                    bt.style.color = 'red';
+                }
+            };
+            this.box.appendChild(bt);
+        }
+    }
 }
 
 function addOptionBox(id,ops,action) 
