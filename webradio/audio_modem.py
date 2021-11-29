@@ -1,5 +1,5 @@
 import numpy as np
-from .javadict import JavaDict
+from webradio.javadict import JavaDict
 
 
 # Modem base class

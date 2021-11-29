@@ -3,15 +3,15 @@ import numpy as np
 from threading import Thread, Event
 import requests
 
-from .fifo import Fifo
-from .javadict import JavaDict
-from .spectrum import PowerSpectrum
-from .tuner import FrequencyShift
-from .ammodem import AMModem
-from .fmmodem import WBFMModem, NBFMModem, FMSModem
-from .lsbmodem import LSBModem
-from .usbmodem import USBModem
-from .cwmodem import CWModem
+from webradio.fifo import Fifo
+from webradio.javadict import JavaDict
+from webradio.spectrum import PowerSpectrum
+from webradio.tuner import FrequencyShift
+from webradio.ammodem import AMModem
+from webradio.fmmodem import WBFMModem, NBFMModem, FMSModem
+from webradio.lsbmodem import LSBModem
+from webradio.usbmodem import USBModem
+from webradio.cwmodem import CWModem
 
 modems = {
     "AM": AMModem,

@@ -3,9 +3,9 @@
 wide band, then shifts up by 650Hz.
 """
 import numpy as np
-from .audio_modem import Modem
-from .tuner import FrequencyShift
-from .filters import IIRFilter, makeFilterChain
+from webradio.audio_modem import Modem
+from webradio.tuner import FrequencyShift
+from webradio.filters import IIRFilter, makeFilterChain
 
 
 class CWModem(Modem):

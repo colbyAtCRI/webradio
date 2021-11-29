@@ -1,7 +1,7 @@
 import numpy as np
 from numpy.fft import fft, fftshift
-from .javadict import JavaDict
-from .filters import DecimationFilter
+from webradio.javadict import JavaDict
+from webradio.filters import DecimationFilter
 
 # from modem import LowPassFilter
 

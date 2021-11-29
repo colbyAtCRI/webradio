@@ -1,9 +1,9 @@
 import numpy as np
 from scipy.signal import lfilter
 
-from .audio_modem import Modem
-from .filters import IIRFilter, makeFilterChain
-from .tuner import FrequencyShift
+from webradio.audio_modem import Modem
+from webradio.filters import IIRFilter, makeFilterChain
+from webradio.tuner import FrequencyShift
 
 
 class DCBlock:

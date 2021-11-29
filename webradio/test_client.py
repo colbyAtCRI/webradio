@@ -1,7 +1,7 @@
 import numpy as np
 import socketio
 from struct import unpack
-from .javadict import ChangeOrder, toCO
+from webradio.javadict import ChangeOrder, toCO
 
 # from matplotlib import pyplot as plt
 

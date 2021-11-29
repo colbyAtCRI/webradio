@@ -166,8 +166,9 @@ SpectrumDisplay.prototype.drawBandMarker = function()
     let ctx = this.context;
     let bs = this.xToPixel(this.band_start);
     let be = this.xToPixel(this.band_end); 
-    ctx.fillStyle = 'rgba(255,0,0,0.3)';
-    ctx.fillRect(bs,0,be-bs,20);
+    let ht = this.canvas.height-40;
+    ctx.fillStyle = 'rgba(0,100,0,1.0)';
+    ctx.fillRect(bs,ht,be-bs,40);
 }
 
 SpectrumDisplay.prototype.plot = function(data) {
@@ -182,9 +183,9 @@ SpectrumDisplay.prototype.plot = function(data) {
     ctx.fillStyle.addColorStop(1,this.backgroundBottomColor);
     ctx.fillRect(0,0,this.canvas.width,this.canvas.height);
     this.drawTuner(data);
+    this.drawBandMarker();
     this.drawYTics();
     this.drawXTics(data.spectrum.fstart,data.spectrum.fend);
-    this.drawBandMarker();
     this.drawCursor();
     ctx.strokeStyle = this.lineColor;
     ctx.lineWidth = this.lineWidth;
