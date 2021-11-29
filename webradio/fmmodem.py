@@ -159,7 +159,7 @@ class FMSModem(Modem):
         #
         Ap = sum(sig * self.kh19[:len(sig)])/len(sig)
         Ap = Ap/np.abs(Ap)
-        Bp = 2*Ap*self.kh38[:len(sig)].imag
+        Bp = 2*(Ap*self.kh38[:len(sig)]).imag
         sig_a = self.exit_decimation_a(self.deemphasis_a(sig))
         sig_b = self.exit_decimation_b(self.deemphasis_b(sig*Bp))
         pcm = np.zeros(2*len(sig_a))
