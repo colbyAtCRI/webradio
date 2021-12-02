@@ -23,6 +23,8 @@ function LogMap(x1,x2,y1,y2)
 
 class Meter 
 {
+    dialImage;
+
     constructor(id_canvas,label,tics,logScale) {
         this.canvas = document.getElementById(id_canvas);
         this.ctx = this.canvas.getContext('2d');
@@ -57,6 +59,8 @@ class Meter
         let xb,yb,xe,ye;
         let a1 = Math.PI + this.a2;
         let a2 = 2*Math.PI - this.a2;
+        this.ctx.fillStyle = this.dialColor;
+        this.ctx.fillRect(0,0,this.canvas.width,this.canvas.height);
         this.ctx.fillStyle = this.textColor;
         this.ctx.font = '10pt monospace';
         this.ctx.textAlign = 'center';
@@ -107,9 +111,13 @@ class Meter
     }
 
     draw(val) {
-        this.ctx.fillStyle = this.dialColor;
-        this.ctx.fillRect(0,0,this.canvas.width,this.canvas.height);
-        this.drawDial();
+        if (this.dialImage) {
+            this.ctx.putImageData(this.dialImage,0,0);
+        }
+        else {
+            this.drawDial();
+            this.dialImage = this.ctx.getImageData(0,0,this.canvas.width,this.canvas.height);
+        }
         this.drawNeedle(val);
     }
 
@@ -142,6 +150,7 @@ class PowerMeter extends Meter
         this.canvas.onclick = function(ev)
         {
             this.squelchLevel = this.valueMap(Math.atan2(this.ym - ev.offsetY, ev.offsetX - this.xm));
+            this.dialImage = undefined;
         }.bind(this);
         this.canvas.onmousemove = function(ev)
         {
@@ -159,6 +168,7 @@ class PowerMeter extends Meter
         this.ctx.beginPath();
         this.ctx.arc(xs,ys,5,0,2*Math.PI);
         this.ctx.closePath();
+        this.ctx.strokeStyle = 'black';
         this.ctx.fillStyle = this.dialColor;
         this.ctx.fill();
         this.ctx.stroke();
@@ -175,12 +185,20 @@ class PowerMeter extends Meter
         this.ctx.stroke();
     }   
 
+    drawDial() {
+        super.drawDial();
+        this.drawSquelch();
+    }
+
     draw(val) {
         this.isSquelched = val < this.squelchLevel;
-        this.ctx.fillStyle = 'rgb(256,256,100)';
-        this.ctx.fillRect(0,0,this.canvas.width,this.canvas.height);
-        this.drawDial();
-        this.drawSquelch();
+        if (this.dialImage) {
+            this.ctx.putImageData(this.dialImage,0,0);
+        }
+        else {
+            this.drawDial();
+            this.dialImage = this.ctx.getImageData(0,0,this.canvas.width,this.canvas.height);
+        }
         this.drawCursor();
         this.drawNeedle(val);
     }
