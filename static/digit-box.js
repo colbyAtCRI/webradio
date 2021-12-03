@@ -65,7 +65,7 @@ class DigitBox
         {
             let value = this.getValue();
             value += inc;
-            if (value > this.minValue && value <= this.maxValue) {
+            if (value >= this.minValue && value <= this.maxValue) {
                 if (this.action)
                     this.action(value);
             }
