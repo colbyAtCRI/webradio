@@ -39,6 +39,7 @@ function range(array)
 function SpectrumDisplay(id_canvas) {
     this.canvas = document.getElementById(id_canvas);
     this.context = this.canvas.getContext('2d');
+    this.backgroundImage = undefined;
     this.backgroundTopColor = 'lightblue';
     this.backgroundBottomColor = 'darkblue';
     this.lineColor = '#FFFF00';
@@ -50,19 +51,37 @@ function SpectrumDisplay(id_canvas) {
     this.xmax = 10;
     this.xmin = 0;
     this.xtic = 100000;
-    this.height = 512;
     this.crop = true;
     this.cursor = -100;
     this.scaleMin = false;
     this.band_start = 0;
     this.band_end = 0;
+    this.lastCF = 0;
+    this.lastTF = 0;
+    this.resizeObserver = new ResizeObserver(thing => this.backgroundImage = undefined);
+    this.resizeObserver.observe(this.canvas.parentElement);
+    this.canvas.onmousemove = function(evnt)
+    {
+        this.cursor = evnt.offsetX;
+    }.bind(this);
+    this.canvas.onmouseleave = function()
+    {
+        this.cursor = -100;
+    }.bind(this);
 }
 
 SpectrumDisplay.prototype.rescaleMin = function() {
     this.scaleMin = true;
 }
 
+SpectrumDisplay.prototype.updateBackground = function()
+{
+    this.backgroundImage = undefined;
+}
+
 SpectrumDisplay.prototype.xrange = function(xmin,xmax) {
+    if (this.xmin != xmin || this.xmax != xmax)
+        this.updateBackground();
     this.xmin = xmin;
     this.xmax = xmax;
     this.xToPixel = LinearTransform(this.xmin,this.xmax,0,this.canvas.width);
@@ -74,6 +93,8 @@ SpectrumDisplay.prototype.cursorFreq = function() {
 }
 
 SpectrumDisplay.prototype.yrange = function(ymin,ymax) {
+    if (this.ymin != ymin || this.ymax != ymax)
+        this.updateBackground();
     this.ymin = ymin;
     this.ymax = ymax;
     this.yToPixel = LinearTransform(this.ymax,this.ymin,0,this.canvas.height);
@@ -172,25 +193,34 @@ SpectrumDisplay.prototype.drawBandMarker = function()
 }
 
 SpectrumDisplay.prototype.plot = function(data) {
+    if (this.lastCF != data.radio.centerFreq || this.lastTF != data.radio.tunerFreq)
+        this.updateBackground();
+    this.lastCF = data.radio.centerFreq;
+    this.lastTF = data.radio.tunerFreq;
     this.canvas.width = this.canvas.parentElement.clientWidth;
     this.canvas.height = this.canvas.parentElement.clientHeight;
     this.xrange(data.spectrum.bstart,data.spectrum.bend);
     this.yrange(this.ymin,this.ymax);
     let ctx = this.context;
-    let fr;
-    ctx.fillStyle = ctx.createLinearGradient(0,0,0,this.canvas.height);
-    ctx.fillStyle.addColorStop(0,this.backgroundTopColor);
-    ctx.fillStyle.addColorStop(1,this.backgroundBottomColor);
-    ctx.fillRect(0,0,this.canvas.width,this.canvas.height);
-    this.drawTuner(data);
-    this.drawBandMarker();
-    this.drawYTics();
-    this.drawXTics(data.spectrum.fstart,data.spectrum.fend);
+    if (this.backgroundImage) {
+        ctx.putImageData(this.backgroundImage,0,0);
+    }
+    else {
+        ctx.fillStyle = ctx.createLinearGradient(0,0,0,this.canvas.height);
+        ctx.fillStyle.addColorStop(0,this.backgroundTopColor);
+        ctx.fillStyle.addColorStop(1,this.backgroundBottomColor);
+        ctx.fillRect(0,0,this.canvas.width,this.canvas.height);
+        this.drawTuner(data);
+        this.drawBandMarker();
+        this.drawYTics();
+        this.drawXTics(data.spectrum.fstart,data.spectrum.fend);
+        this.backgroundImage = ctx.getImageData(0,0,this.canvas.width,this.canvas.height);
+    }
     this.drawCursor();
     ctx.strokeStyle = this.lineColor;
     ctx.lineWidth = this.lineWidth;
     ctx.beginPath();
-    fr = data.spectrum.fstart;
+    let fr = data.spectrum.fstart;
     ctx.moveTo(this.xToPixel(fr),this.yToPixel(data.spectrum.data[0]));
     for (let n = 1; n < data.spectrum.length; n++) {
         fr += data.spectrum.fstep;
@@ -204,5 +234,6 @@ SpectrumDisplay.prototype.plot = function(data) {
         let e = Math.floor((data.spectrum.bend - fstart)/fstep);
         this.ymin = Math.floor(Math.min(...data.spectrum.data.slice(b,e)))-10;
         this.scaleMin = false;
+        this.updateBackground();
     }
 }
