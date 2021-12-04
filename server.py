@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from os import getpid
 from flask import Flask, render_template, request
 from webradio.radio_thread import Radio, devs
 from flask_socketio import SocketIO, join_room, close_room
@@ -145,6 +146,9 @@ def start():
     for radio in _radios.values():
         radio.stop()
 
+@app.route("/pid")
+def get_pid():
+    return str(getpid())
 
 if __name__ == "__main__":
     start()
