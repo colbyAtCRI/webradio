@@ -1,0 +1,35 @@
+#!/usr/bin/bash
+
+proc=$(curl -s 'http://localhost:5000/pid')
+if [[ -z $1 ]]; then
+   if [[ -z $proc ]]; then
+      echo no server running;
+   else
+      echo $proc is running;
+   fi
+else  
+for x in $*; do
+   case $x in
+      "-k") 
+         if [[ -z $proc ]]; then
+            echo No server running;
+         else
+            echo killing $proc
+            kill $proc;
+         fi
+      ;;
+      "-s")
+         if [[ -n $proc ]]; then
+            echo $proc is running;
+         else
+            cd $HOME/webradio
+            ./server.py > $HOME/webradio.log 2>&1 &
+            disown -h %1 
+            proc=$(curl -s 'http://localhost:5000/pid')
+            echo $proc started ;
+            cd - > /dev/null
+         fi
+      ;;
+   esac
+done;
+fi
