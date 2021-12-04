@@ -93,6 +93,54 @@ class PresetButtons
     }
 }
 
+// ToggleButtons, such as the tuner-lock button, control or modify
+// several UI functions. One my define N states in which case clicking
+// will cycle through the states. States is an array of objects of the 
+// form [state0,state1,...] where states all have the form,
+//
+//     stateN = {'text':`some text`,'style':`some style choices`}
+//
+// Each UI element using the toggle may associate a different action
+// for each state using the select method.
+
+class ToggleButton
+{
+    constructor(id,states) {
+        this.element = document.getElementById(id);
+        this.states = states;
+        this.state = 0;
+        this.setState();
+        this.element.onclick = function()
+        {
+            this.state += 1;
+            if (this.state >= this.states.length)
+                this.state = 0;
+            this.setState();
+        }.bind(this);
+    }
+
+    setState() {
+        this.element.innerHTML = this.states[this.state].text;
+        for (let prop in this.states[this.state].style) {
+            this.element.style[prop] = this.states[this.state].style[prop];
+        }
+        if (this.states[this.state].action) {
+            this.states[this.state].action();
+        }
+    }
+
+    text() {
+        return this.states[this.state].text;
+    }
+
+    select(action) {
+        return function(...args)
+        {
+            action[this.state](...args);
+        }.bind(this);
+    }
+}
+
 function addOptionBox(id,ops,action) 
 {
     this.action = action;
