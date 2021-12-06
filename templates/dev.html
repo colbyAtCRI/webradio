@@ -145,6 +145,16 @@
             {
                 freqStep.setValue(value);
             });
+            $('#left-pan').on('click',tunerLock.select(
+            [
+                () => setTunerFreq(tunerControl.getValue()+freqStep.getValue()),
+                () => setCenterFreq(tunerControl.getValue()+freqStep.getValue())
+            ]));
+            $('#right-pan').on('click',tunerLock.select(
+            [
+                () => setTunerFreq(tunerControl.getValue()-freqStep.getValue()),
+                () => setCenterFreq(tunerControl.getValue()-freqStep.getValue())
+            ]));
             const audioOut = new PCMPlayer();
             // Spectrum UI 
             $('#spectrum').on('click',tunerLock.select(
@@ -276,7 +286,7 @@
                 socket.emit('claim',myRadio,audioOut.audio_sr,onClaim);
                 // Start with something pleasent 
                 let co = new ChangeOrder();
-                co.radio.tunerFreq = 7150000;
+                co.radio.centerFreq = 7150000;
                 co.radio.modem_type = 'LSB';
                 socket.emit('apply',co);
             });
