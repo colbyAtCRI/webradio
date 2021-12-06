@@ -173,10 +173,12 @@ class Radio:
                 self.stream = self.radio.setupStream(RX, CF32)
                 self.radio.activateStream(self.stream)
             if rc.centerFreq:
+                df = rc.centerFreq - self.config.centerFreq
                 self.radio.setFrequency(RX, 0, rc.centerFreq)
                 self.config.centerFreq = rc.centerFreq
+                self.config.tunerFreq += df
             if rc.tunerFreq:
-                self.setTunerFreq(rc.tunerFreq)
+                self.config.tunerFreq = rc.tunerFreq
             if rc.bandwidth:
                 self.radio.setBandwidth(RX, 0, rc.bandwidth)
             if rc.iqdatalength:
@@ -276,32 +278,6 @@ class Radio:
 
         self.radio.deactivateStream(self.stream)
         self.radio.closeStream(self.stream)
-
-    # The concept is the user need only control/set the tunerFreq
-    # and this logic sets the centerFreq of the radio sensibly.
-    # The frequency offset parameter makes certain the tunerFreq
-    # never lies on the 0 frequency of the spectrum. Most of the
-    # time this isn't a problem. However, placing an AM modem on
-    # the radio center frequency causes the carrier to be killed
-    # off by the DC offset algorithm which is ugly and sounds noisy.
-    #
-    # Also, this places the frequency shifting on the modem code
-    # where it belongs since modems may want to apply their own
-    # offsets.
-    #
-    # Comment update: Given the trouble with SSB sounding gravlly
-    # for tuning far from the radio center frequency, the feature
-    # of adding an offset just adds confusion to the UI.
-    def setTunerFreq(self, freq):
-        self.config.tunerFreq = freq
-        fl = self.config.centerFreq - self.config.sampleRate / 2
-        fu = self.config.centerFreq + self.config.sampleRate / 2
-        if np.abs(freq - self.config.centerFreq) < self.config.offset or not (
-            freq < fu and freq > fl
-        ):
-            self.config.centerFreq = freq - self.config.offset
-            self.radio.setFrequency(RX, 0, self.config.centerFreq)
-        self.modem.updateTunning(self.config)
 
     def start(self):
         if not self.task:
