@@ -107,7 +107,7 @@ nav {
    font-family: monospace;
    font-size: 20px;
    color: white;
-   display: inline;
+   display: none;
    position: absolute;
    top: 6%;
    right: 2%;
