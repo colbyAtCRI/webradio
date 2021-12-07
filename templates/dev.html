@@ -87,7 +87,11 @@
                     </tr>
                     <tr>
                         <td style='text-align:right'>FR:</td>
-                        <td id='frame-rate' class='setting'>60<td>
+                        <td id='frame-rate' class='setting'>60</td>
+                    </tr>
+                    <tr>
+                        <td style='text-align:right'>TM:</td>
+                        <td id='tic-marks' class='setting'>100000</td>
                     </tr>
                 </table>
                 <!-- Put the option-overlays here on top of the overlay -->
@@ -108,6 +112,10 @@
             <button id='left-pan' type='button' class='control-button'>&gt</button>
         </section>
         <script type='text/javascript'>
+            $('#upper-right').on('click',function()
+            {
+                $('#overlay').toggle();
+            });
             const spectrumDisplay = new SpectrumDisplay('spectrum');
             // Tuner Lock Button
             const states = [
@@ -157,11 +165,7 @@
             ]));
             const audioOut = new PCMPlayer();
             // Spectrum UI 
-            $('#spectrum').on('click',tunerLock.select(
-            [
-                () => setTunerFreq(1000*Math.floor(spectrumDisplay.cursorFreq()/1000)),
-                () => setCenterFreq(1000*Math.floor(spectrumDisplay.cursorFreq()/1000))
-            ]));
+            $('#spectrum').on('click',() => setTunerFreq(1000*Math.floor(spectrumDisplay.cursorFreq()/1000)));
             // Modem Button
             $('.modem-select').click(function()
             {
@@ -171,7 +175,6 @@
                 let co = new ChangeOrder();
                 co.radio.modem_type = this.innerHTML;
                 socket.emit('apply',co);
-                spectrumDisplay.updateBackground();
             });
             function updateModem(stat)
             {
@@ -196,6 +199,7 @@
             ]);
             function statusUpdate(stat)
             {
+                spectrumDisplay.updateBackground();
                 console.log(stat);
                 updateTunerControl(stat);
                 updateModem(stat);
@@ -290,9 +294,11 @@
                 co.radio.modem_type = 'LSB';
                 socket.emit('apply',co);
             });
-            new addOptionBox('lower-left',[100000,50000,25000,20000,10000],function(val)
+            var ticMarks = new addOptionBox('tic-marks',[100000,50000,25000,20000,10000],function(val)
             {
                 spectrumDisplay.xtic = val;
+                ticMarks.option.innerHTML = String(val);
+                spectrumDisplay.updateBackground();
             });
         </script>
     </body>
