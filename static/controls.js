@@ -34,7 +34,7 @@ class Band
 }
 
 const FMStationPresets = [
-    new Band('89.7',89.6,89.8,'FMS',0.1),
+    new Band('KGO',0.80,0.82,'AM',0.01),
     new Band('91.1',91,91.2,'FMS',0.1),
     new Band('91.5',91.4,91.6,'FMS',0.1),
     new Band('104.9',104.8,105.0,'FMS',0.1),
