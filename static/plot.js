@@ -187,9 +187,9 @@ SpectrumDisplay.prototype.drawBandMarker = function()
     let ctx = this.context;
     let bs = this.xToPixel(this.band_start);
     let be = this.xToPixel(this.band_end); 
-    let ht = this.canvas.height-40;
-    ctx.fillStyle = 'rgba(0,100,0,1.0)';
-    ctx.fillRect(bs,ht,be-bs,40);
+    let ht = this.canvas.height-10;
+    ctx.fillStyle = 'lightgreen';
+    ctx.fillRect(bs,ht,be-bs,10);
 }
 
 SpectrumDisplay.prototype.plot = function(data) {
