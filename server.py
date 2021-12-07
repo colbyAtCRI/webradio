@@ -53,21 +53,18 @@ def on_hardware(junk):
         return radio.hardware
 
 
-@app.route("/data-ready/<sid>")
-def data_ready(sid):
+@socketio.on("data-ready")
+def ready_data(sid):
     radio = _radios.get(sid)
     if radio:
         socketio.emit("data", radio.getData(), to=sid)
-    return "ok"
 
 
-@app.route("/status/<sid>")
-def on_status(sid):
-    global _radios
+@socketio.on("status")
+def status_on(sid):
     radio = _radios.get(sid)
     if radio:
         socketio.emit("status", radio.getStatus(), to=sid)
-    return "ok"
 
 
 @socketio.on("apply")
@@ -99,7 +96,7 @@ def claim_radio(indx, audio_sr):
         _radios[sid].start()
         join_room(sid)
         print(f"radio {_radios[sid].hardware.key} opened")
-    except(e):
+    except (e):
         print("radio open failed")
         return "fail"
     stat = _radios[sid].radioStatus()
@@ -109,7 +106,7 @@ def claim_radio(indx, audio_sr):
 
 @socketio.on("close")
 def close_radio():
-    global _radios
+    print("closing radio")
     sid = request.sid
     radio = _radios.get(sid)
     if radio:
@@ -129,11 +126,13 @@ def on_connect():
 
 @socketio.on("disconnect")
 def on_disconnect():
-    global _radios
+    print("disconnecting")
     radio = _radios.get(request.sid)
     if radio:
         key = radio.hardware.key
+        print("stopping radio")
         radio.stop()
+        print("closing radio")
         radio.close()
         _radios.pop(request.sid)
         print(f"radio {key} closed")
@@ -142,13 +141,15 @@ def on_disconnect():
 
 def start():
     print("starting webradio server")
-    socketio.run(app, host="0.0.0.0", port=5000, debug=False, use_reloader=True)
+    socketio.run(app, host="0.0.0.0", port=5000, debug=True, use_reloader=True)
     for radio in _radios.values():
         radio.stop()
+
 
 @app.route("/pid")
 def get_pid():
     return str(getpid())
+
 
 if __name__ == "__main__":
     start()

@@ -1,7 +1,7 @@
 from soapy_sdr import SoapySDR as sdr
 import numpy as np
 from threading import Thread, Event
-import requests
+import socketio
 
 from webradio.fifo import Fifo
 from webradio.javadict import JavaDict
@@ -65,6 +65,8 @@ class Radio:
             self.radio.setSampleRate(RX, 0, 768000)
         else:
             self.radio.setSampleRate(RX, 0, 1536000)
+
+        self.socket = socketio.Client()
 
         # fill out radio hardware info
         self.hardware = JavaDict()
@@ -235,6 +237,7 @@ class Radio:
         self.changeQueue.put(change_order)
 
     def run(self):
+        self.socket.connect("http://localhost:5000")
         elapsedTime = 0
         self.running.set()
         # Note that python numpy np.complex64 is
@@ -251,7 +254,7 @@ class Radio:
                 self.spectrum.updateConfig(change, self.config)
                 self.modem.updateConfig(change, self.config)
                 self.ackQueue.put(self.radioStatus())
-                requests.get("http://localhost:5000/status/" + self.sid)
+                self.socket.emit("status",self.sid)
 
             iqdata = np.zeros(self.config.iqdatalength, np.complex64)
 
@@ -273,7 +276,7 @@ class Radio:
                 self.dataQueue.put(
                     (self.radioStatus(), self.spectrumData(), self.audioData())
                 )
-                requests.get("http://localhost:5000/data-ready/" + self.sid)
+                self.socket.emit("data-ready",self.sid)
                 elapsedTime = 0
 
         self.radio.deactivateStream(self.stream)
