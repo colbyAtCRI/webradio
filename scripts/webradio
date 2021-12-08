@@ -25,8 +25,12 @@ for x in $*; do
             cd $HOME/webradio
             ./server.py > $HOME/webradio.log 2>&1 &
             disown -h %1 
-            proc=$(curl -s 'http://localhost:5000/pid')
-            echo $proc started ;
+            while [[ -z $proc ]]
+            do
+                sleep 1
+                proc=$(curl -s 'http://localhost:5000/pid')
+            done
+            echo $proc started | tee -a $HOME/webradio.log
             cd - > /dev/null
          fi
       ;;
