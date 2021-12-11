@@ -94,12 +94,13 @@
                         <td id='tic-marks' class='setting'>100000</td>
                     </tr>
                 </table>
+                <table id='display-settings' class='option-table'></table>
                 <!-- Put the option-overlays here on top of the overlay -->
                 <div id='option-overlay'></div>
                 <div id='rescale-min' class='active-area'></div>
                 <div id='upper-right' class='active-area'></div>
                 <div id='center-top' class='active-area'></div>
-                <div id='lower-left' class='active-area'></div>
+                <div id='upper-left' class='active-area'></div>
             </div>
         </div>
         <p>
@@ -112,11 +113,40 @@
             <button id='left-pan' type='button' class='control-button'>&gt</button>
         </section>
         <script type='text/javascript'>
+            const spectrumDisplay = new SpectrumDisplay('spectrum');
+            var displaySettings = new OptionTable('display-settings');
+            displaySettings.addOptions('Scale:',[-10,-20,-30,-40,-50],function(op,val)
+            {
+                spectrumDisplay.ymax = val;
+                spectrumDisplay.updateBackground();
+                op.innerHTML = val;
+            },stat => spectrumDisplay.ymax);
+            displaySettings.addOptions('Crop:',[true,false],function(op,val)
+            {
+                let co = new ChangeOrder();
+                co.spectrum.crop = val;
+                apply(co);
+            },stat=>stat.spectrum.crop);
+            displaySettings.addOptions('Zoom:',[1,2,3,4,5,6,7,8,9,10],function(op,val)
+            {
+                let co = new ChangeOrder();
+                co.spectrum.decimation = val;
+                apply(co);
+            }, stat => stat.spectrum.decimation);
+            displaySettings.addOptions('Freq Tics:',[100000,50000,25000,20000,10000],function(op,val)
+            {
+                spectrumDisplay.xtic = val;
+                spectrumDisplay.updateBackground();
+                op.innerHTML = val;
+            }, stat => spectrumDisplay.xtic);
             $('#upper-right').on('click',function()
             {
                 $('#overlay').toggle();
             });
-            const spectrumDisplay = new SpectrumDisplay('spectrum');
+            $('#upper-left').on('click',function()
+            {
+                $('#display-settings').toggle();
+            });
             // Tuner Lock Button
             const states = [
                 {
@@ -221,6 +251,7 @@
                 });
                 presetBox1.updateStatus(stat);
                 presetBox2.updateStatus(stat);
+                displaySettings.monitorStatus(stat);
             }
             // Trigger a rescale minimum dB on next data event 
             $('#rescale-min').on('click',function()
@@ -243,7 +274,7 @@
             // Claim radio selected
             function onClaim(stat) 
             {
-                $('#hardware-key')[0].innerHTML = stat.hardware.key;
+                $('#hardware-key')[0].innerHTML = stat.hardware.key+'@'+document.location.hostname;
                 // deal with rsp2 and rspduo differences. A gain
                 // sel of '0' is the default which is kinda hot
                 // for the rsp2.

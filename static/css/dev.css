@@ -94,8 +94,8 @@ nav {
    transform:translateX(-50%);
 }
 
-#lower-left.active-area {
-   bottom: 0%;
+#upper-left.active-area {
+   top: 0%;
    left: 0%;
 }
 
@@ -121,6 +121,10 @@ nav {
    right: 2%;
 }
 
+#display-settings {
+    display: none;
+}
+
 .option {
     font-family: monospace;
     font-size: 20px;
@@ -136,6 +140,43 @@ nav {
    background: black;
    opacity: 1;
 }
+
+.option-table {
+    position: absolute;
+    top: 6%;
+    left: 10%;
+    opacity: 0.5;
+}
+
+.option-label {
+    font-family: monospace;
+    font-size: 20px;
+    color: white;
+    text-align: right;
+}
+
+.option-value {
+    font-family: monospace;
+    font-size: 20px;
+    color: white;
+}
+
+.option-value:hover {
+    opacity: 1;
+    background: black;
+}
+
+.option-popup {
+    font-family: monospace;
+    font-size: 20px;
+    color: white;
+    background: black;
+}
+
+.option-item:hover {
+    color: red;
+}
+
 
 #tuner-controls {
 }

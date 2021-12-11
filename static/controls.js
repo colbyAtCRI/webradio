@@ -36,7 +36,7 @@ class Band
 const FMStationPresets = [
     new Band('KGO',0.80,0.82,'AM',0.01),
     new Band('91.1',91,91.2,'FMS',0.1),
-    new Band('91.5',91.4,91.6,'FMS',0.1),
+    new Band('98.5',98.4,98.6,'FMS',0.1),
     new Band('104.9',104.8,105.0,'FMS',0.1),
     new Band('105.3',105.2,105.4,'FMS',0.1),
     new Band('106.5',106.4,106.6,'FMS',0.1),
@@ -138,6 +138,68 @@ class ToggleButton
         {
             action[this.state](...args);
         }.bind(this);
+    }
+}
+
+// Rework of option overlays using js classes. The OptionTable
+// constructor is passes the id of an empty HTML table. Rows
+// consisting of an option-label and an option-value are added
+// by calling addOptions member.
+class OptionTable
+{
+    constructor(id) {
+        this.table = document.getElementById(id);
+        this.statusMonitors = [];
+    }
+
+    addOptions(label,options,onselect,monitor) {
+        let row = document.createElement('tr');
+        let lbl = document.createElement('td');
+        let opt = document.createElement('td');
+        let val = document.createElement('div');
+        let pup = document.createElement('div');
+        lbl.setAttribute('class','option-label');
+        val.setAttribute('class','option-value');
+        pup.setAttribute('class','option-popup');
+        row.appendChild(lbl);
+        row.appendChild(opt);
+        opt.appendChild(val);
+        opt.appendChild(pup);
+        lbl.innerHTML = label;
+        if (monitor) {
+            this.statusMonitors.push(function(stat)
+            {
+                val.innerHTML = monitor(stat);
+            }.bind(this)); 
+        }
+        val.onclick = function()
+        {
+            val.style.display = 'none';
+            pup.style.display = '';
+        }.bind(this);
+        pup.onmouseleave = function()
+        {
+            pup.style.display = 'none';
+            val.style.display = '';
+        }.bind(this);
+        for (let value of options) {
+            let op = document.createElement('div');
+            op.setAttribute('class','option-item');
+            op.innerHTML = value;
+            pup.appendChild(op);
+            op.onclick = function() 
+            {
+                onselect(val,value);
+                pup.style.display = 'none';
+                val.style.display = '';
+            }.bind(this);
+        }
+        pup.style.display = 'none';
+        this.table.appendChild(row);
+    }
+
+    monitorStatus(stat) {
+        this.statusMonitors.forEach(mon => mon(stat));
     }
 }
 
