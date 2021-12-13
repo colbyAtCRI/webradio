@@ -143,7 +143,7 @@ class Radio:
     def updateSettings(self, change):
         n = 0
         for s in self.settings:
-            if change.settings and change.settings.get(s.key):
+            if change.settings and change.settings.get(s.key) is not None:
                 n = n + 1
                 s.value = change.settings[s.key]
         if n > 0:

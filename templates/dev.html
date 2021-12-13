@@ -64,39 +64,9 @@
             </div>
             <div class='spectrum-display'>
                 <canvas id='spectrum'></canvas>
-                <table id='overlay'>
-                    <tr>
-                        <td style='text-align:right'>AN:</td>
-                        <td id='antenna' class='setting'></td>
-                    </tr>
-                    <tr>
-                        <td style='text-align:right'>SR:</td>
-                        <td id='sample-rate' class='setting'></td>
-                    </tr>
-                    <tr>
-                        <td style='text-align:right'>BW:</td>
-                        <td id='bandwidth' class='setting'></td>
-                    </tr>
-                    <tr>
-                        <td style='text-align:right'>DL:</td>
-                        <td id='data-length' class='setting'>4096</td>
-                    </tr>
-                    <tr>
-                        <td style='text-align:right'>GS:</td>
-                        <td id='gain-select' class='setting'></td>
-                    </tr>
-                    <tr>
-                        <td style='text-align:right'>FR:</td>
-                        <td id='frame-rate' class='setting'>60</td>
-                    </tr>
-                    <tr>
-                        <td style='text-align:right'>TM:</td>
-                        <td id='tic-marks' class='setting'>100000</td>
-                    </tr>
-                </table>
                 <table id='display-settings' class='option-table'></table>
+                <table id='radio-setup' class='option-table'></table>
                 <!-- Put the option-overlays here on top of the overlay -->
-                <div id='option-overlay'></div>
                 <div id='rescale-min' class='active-area'></div>
                 <div id='upper-right' class='active-area'></div>
                 <div id='center-top' class='active-area'></div>
@@ -115,33 +85,46 @@
         <script type='text/javascript'>
             const spectrumDisplay = new SpectrumDisplay('spectrum');
             var displaySettings = new OptionTable('display-settings');
-            displaySettings.addOptions('Scale:',[-10,-20,-30,-40,-50],function(op,val)
+            // Spectrum Display Control
+            displaySettings.addOptions('Scale',[-10,-20,-30,-40,-50],function(op,val)
             {
                 spectrumDisplay.ymax = val;
                 spectrumDisplay.updateBackground();
                 op.innerHTML = val;
             },stat => spectrumDisplay.ymax);
-            displaySettings.addOptions('Crop:',[true,false],function(op,val)
+            displaySettings.addOptions('Crop',[true,false],function(op,val)
             {
                 let co = new ChangeOrder();
                 co.spectrum.crop = val;
                 apply(co);
             },stat=>stat.spectrum.crop);
-            displaySettings.addOptions('Zoom:',[1,2,3,4,5,6,7,8,9,10],function(op,val)
+            displaySettings.addOptions('Zoom',[1,2,3,4,5,6,7,8,9,10],function(op,val)
             {
                 let co = new ChangeOrder();
                 co.spectrum.decimation = val;
                 apply(co);
             }, stat => stat.spectrum.decimation);
-            displaySettings.addOptions('Freq Tics:',[100000,50000,25000,20000,10000],function(op,val)
+            displaySettings.addOptions('Freq Tic',[100000,50000,25000,20000,10000],function(op,val)
             {
                 spectrumDisplay.xtic = val;
                 spectrumDisplay.updateBackground();
                 op.innerHTML = val;
             }, stat => spectrumDisplay.xtic);
+            displaySettings.addOptions('dBm Tic',[5,10,15,20,25,30],function(op,val)
+            {
+                spectrumDisplay.ytic = val;
+                spectrumDisplay.updateBackground();
+                op.innerHTML = val;
+            }, stat => spectrumDisplay.ytic);
+            displaySettings.addOptions('Frame Rate',[40,50,60,70,80,90,100],function(op,val)
+            {
+                let co = new ChangeOrder();
+                co.radio.frameRate = val;
+                apply(co);
+            }, stat => stat.radio.frameRate);
             $('#upper-right').on('click',function()
             {
-                $('#overlay').toggle();
+                $('#radio-setup').toggle();
             });
             $('#upper-left').on('click',function()
             {
@@ -227,31 +210,17 @@
                 (stat) => tunerControl.setValue(stat.radio.tunerFreq),
                 (stat) => tunerControl.setValue(stat.radio.centerFreq)
             ]);
+            const radioSettings = new OptionTable('radio-setup');
             function statusUpdate(stat)
             {
                 spectrumDisplay.updateBackground();
                 console.log(stat);
                 updateTunerControl(stat);
                 updateModem(stat);
-                $('#antenna').each(function()
-                {
-                    this.innerHTML = stat.radio.antenna;
-                });
-                $('#sample-rate').each(function()
-                {
-                    this.innerHTML = stat.radio.sampleRate;
-                });
-                $('#bandwidth').each(function() 
-                {
-                    this.innerHTML = stat.radio.bandwidth;
-                });
-                $('#gain-select').each(function()
-                {
-                    this.innerHTML = stat.radio.settings[0].value;
-                });
                 presetBox1.updateStatus(stat);
                 presetBox2.updateStatus(stat);
                 displaySettings.monitorStatus(stat);
+                radioSettings.monitorStatus(stat);
             }
             // Trigger a rescale minimum dB on next data event 
             $('#rescale-min').on('click',function()
@@ -284,38 +253,32 @@
                     apply(co);
                 }
                 hardware = stat.hardware;
-                new addOptionBox('antenna',hardware.antennas,function(ant)
+                if (hardware.antennas.length > 1) {
+                    radioSettings.addOptions('RF Input',hardware.antennas,function(op,val)
+                    {
+                        let co = new ChangeOrder();
+                        co.radio.antenna = val;
+                        apply(co)
+                    }, stat => stat.radio.antenna);
+                }
+                radioSettings.addOptions('Sample Rate',hardware.sampleRates,function(op,val)
                 {
                     let co = new ChangeOrder();
-                    co.radio.antenna = ant;
+                    co.radio.sampleRate = val;
                     apply(co);
-                });
-                new addOptionBox('sample-rate',hardware.sampleRates,function(sr)
-                {
-                    let co = new ChangeOrder();
-                    co.radio.sampleRate = sr;
-                    apply(co);
-                });
-                new addOptionBox('gain-select',stat.radio.settings[0].options,function(gn)
-                {
-                    let co = new ChangeOrder();
-                    co.radio.settings[stat.radio.settings[0].key] = gn;
-                    apply(co);
-                });
-                let frameRate = new addOptionBox('frame-rate',[40,50,60,70,80,90,100],function(fr)
-                {
-                    let co = new ChangeOrder();
-                    co.radio.frameRate = Number(fr);
-                    frameRate.option.innerHTML = String(fr);
-                    apply(co);
-                });
-                let dataLength = new addOptionBox('data-length',[1024,2048,4096],function(dl)
-                {
-                    let co = new ChangeOrder();
-                    co.radio.iqdatalength = Number(dl);
-                    dataLength.option.innerHTML = String(dl);
-                    apply(co);
-                });
+                }, stat => stat.radio.sampleRate); 
+                if (hardware.bandwidths.length > 1) {
+                    // SDRPlay allows the radio bandwidth to be set independently of
+                    // the radio sample rate. I suggest just letting SoapySDRPlay3 set
+                    // it to a sensible value.
+                    radioSettings.addOptions('Bandwidth',hardware.bandwidths,function(op,val)
+                    {
+                        let co = new ChangeOrder();
+                        co.radio.bandwidth = val;
+                        apply(co);
+                    }, stat => stat.radio.bandwidth);
+                }
+                radioSettings.addSettings(stat.radio.settings);
             }
             $(document).ready(function() {
                 socket.emit('claim',myRadio,audioOut.audio_sr,onClaim);
@@ -324,12 +287,6 @@
                 co.radio.centerFreq = 7150000;
                 co.radio.modem_type = 'LSB';
                 socket.emit('apply',co);
-            });
-            var ticMarks = new addOptionBox('tic-marks',[100000,50000,25000,20000,10000],function(val)
-            {
-                spectrumDisplay.xtic = val;
-                ticMarks.option.innerHTML = String(val);
-                spectrumDisplay.updateBackground();
             });
         </script>
     </body>

@@ -174,6 +174,7 @@ class OptionTable
         }
         val.onclick = function()
         {
+            pup.width = opt.width;
             val.style.display = 'none';
             pup.style.display = '';
         }.bind(this);
@@ -198,48 +199,29 @@ class OptionTable
         this.table.appendChild(row);
     }
 
+    addSettings(settings) {
+        for (let n in settings) {
+            let setting = settings[n];
+            if (setting.options.length > 1) {
+                this.addOptions(setting.name,setting.options,function(op,val)
+                {
+                    let co = new ChangeOrder();
+                    co.radio.settings[setting.key] = val;
+                    apply(co);
+                }, stat => stat.radio.settings[n].value);
+            }
+            else if (setting.type === 0) {
+                this.addOptions(setting.name,['on','off'],function(op,val)
+                {
+                    let co = new ChangeOrder();
+                    co.radio.settings[setting.key] = (val === 'on');
+                    apply(co);
+                }, stat => (stat.radio.settings[n].value==='true')?'on':'off');
+            }
+        }
+    }
+
     monitorStatus(stat) {
         this.statusMonitors.forEach(mon => mon(stat));
     }
-}
-
-function addOptionBox(id,ops,action) 
-{
-    this.action = action;
-    this.option = document.getElementById(id);
-    this.elem = document.createElement('div');
-    this.elem.setAttribute('class','option-box');
-    for (let n = 0; n < ops.length; n++) {
-        let op = document.createElement('div');
-        op.setAttribute('class','option');
-        this.elem.appendChild(op);
-        op.innerHTML = ops[n];
-        op.onclick = function()
-        {
-            this.action(ops[n]);
-            this.hide();
-        }.bind(this);
-    }
-    $('#option-overlay')[0].appendChild(this.elem);
-    this.option.onclick = function() 
-    {
-        this.show();
-    }.bind(this);
-    this.elem.onmouseleave = function()
-    {
-        this.hide();
-    }.bind(this);
-    this.hide = function()
-    {
-        this.elem.style.border = 'none';
-        this.elem.style.display = 'none';
-        this.elem.style.opacity = '0';
-    }.bind(this);
-    this.show = function()
-    {
-        this.elem.style.border = '10px solid orange';
-        this.elem.style.display = 'block';
-        this.elem.style.opacity = '1';
-    }.bind(this);
-    this.hide();
 }
