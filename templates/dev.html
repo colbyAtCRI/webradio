@@ -283,6 +283,14 @@
                         apply(co);
                     }, stat => stat.radio.bandwidth);
                 }
+                if (hardware.hasGainMode) {
+                    radioSettings.addOptions('AGC',['on','off'],function(op,val)
+                    {
+                        let co = new ChangeOrder();
+                        co.radio.gainMode = (val === 'on');
+                        apply(co);
+                    }, stat => (stat.radio.gainMode)?'on':'off');
+                }
                 radioSettings.addSettings(stat.radio.settings);
             }
             $(document).ready(function() {

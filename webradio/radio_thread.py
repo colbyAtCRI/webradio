@@ -78,6 +78,7 @@ class Radio:
         self.hardware.frequencies = self.radio.listFrequencies(RX, 0)
         self.hardware.antennas = self.radio.listAntennas(RX, 0)
         self.hardware.hasDCOffsetMode = self.radio.hasDCOffsetMode(RX, 0)
+        self.hardware.hasGainMode = self.radio.hasGainMode(RX, 0)
         self.hardware.hasFreqCorrection =\
             self.radio.hasFrequencyCorrection(RX, 0)
 
