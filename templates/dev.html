@@ -86,6 +86,12 @@
             const spectrumDisplay = new SpectrumDisplay('spectrum');
             var displaySettings = new OptionTable('display-settings');
             // Spectrum Display Control
+            displaySettings.addOptions('FFT Length',[512,1024,2048,4096],function(op,val)
+            {
+                let co = new ChangeOrder();
+                co.spectrum.length = val;
+                apply(co);
+            }, stat => stat.spectrum.length);
             displaySettings.addOptions('Scale',[-10,-20,-30,-40,-50],function(op,val)
             {
                 spectrumDisplay.ymax = val;
