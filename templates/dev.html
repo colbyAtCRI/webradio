@@ -3,7 +3,7 @@
         <title>WebRadio</title>
         <script src='/static/node_modules/socket.io/client-dist/socket.io.js'></script>
         <script src='/static/node_modules/jquery/dist/jquery.js'></script>
-        <script src='/static/plot.js'></script>
+        <script src='/static/spectrum.js'></script>
         <script src='/static/controls.js'></script>
         <script src='/static/pcm-player.js'></script>
         <script src='/static/digit-box.js'></script>
@@ -92,12 +92,11 @@
                 spectrumDisplay.updateBackground();
                 op.innerHTML = val;
             },stat => spectrumDisplay.ymax);
-            displaySettings.addOptions('Crop',[true,false],function(op,val)
+            displaySettings.addOptions('Crop',['on','off'],function(op,val)
             {
-                let co = new ChangeOrder();
-                co.spectrum.crop = val;
-                apply(co);
-            },stat=>stat.spectrum.crop);
+                spectrumDisplay.crop = (val === 'on');
+                op.innerHTML = val;
+            }, stat => (spectrumDisplay.crop) ? 'on' : 'off');
             displaySettings.addOptions('Zoom',[1,2,3,4,5,6,7,8,9,10],function(op,val)
             {
                 let co = new ChangeOrder();
@@ -147,8 +146,8 @@
             // Band Select Boxes
             function setBandMarker(fs,fe)
             {
-                spectrumDisplay.band_start = fs;
-                spectrumDisplay.band_end = fe;
+                spectrumDisplay.bandStart = fs;
+                spectrumDisplay.bandEnd = fe;
             }
             const presetBox1 = new PresetButtons('box1',12,HamBands,setBandMarker);
             const presetBox2 = new PresetButtons('box2',12,FMStationPresets);

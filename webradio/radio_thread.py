@@ -179,6 +179,7 @@ class Radio:
                 self.radio.setFrequency(RX, 0, rc.centerFreq)
                 self.config.centerFreq = rc.centerFreq
                 self.config.tunerFreq += df
+                self.spectrum.config.displayCenter += df;
             if rc.tunerFreq:
                 self.config.tunerFreq = rc.tunerFreq
             if rc.bandwidth:

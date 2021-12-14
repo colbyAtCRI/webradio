@@ -2,6 +2,7 @@ import numpy as np
 from numpy.fft import fft, fftshift
 from webradio.javadict import JavaDict
 from webradio.filters import DecimationFilter
+from webradio.tuner import FrequencyShift
 
 # from modem import LowPassFilter
 
@@ -17,26 +18,15 @@ class PowerSpectrum:
         self.iqbuffer = np.zeros(0, np.float32)
         self.config.decimation = 1
         self.count = 0
-        self.config.crop = True
         self.init(radio)
 
     def init(self, radio):
         dec = self.config.decimation
+        if dec == 1:
+            self.config.displayCenter = radio.centerFreq
         self.config.fstep = radio.sampleRate / self.config.length / dec
-        self.config.fstart = radio.centerFreq - radio.sampleRate / 2.0 / dec
-        self.config.fend = radio.centerFreq + radio.sampleRate / 2.0 / dec
-        # set the displayed bandwidth sensibly
-        if dec > 1:
-            self.config.bstart =\
-                radio.centerFreq - 0.9 * radio.sampleRate / 2.0 / dec
-            self.config.bend =\
-                radio.centerFreq + 0.9 * radio.sampleRate / 2.0 / dec
-        elif self.config.crop:
-            self.config.bstart = radio.centerFreq - radio.bandwidth / 2
-            self.config.bend = radio.centerFreq + radio.bandwidth / 2
-        else:
-            self.config.bstart = self.config.fstart
-            self.config.bend = self.config.fend
+        self.config.fstart = self.config.displayCenter - radio.sampleRate / 2.0 / dec
+        self.config.fend = self.config.displayCenter + radio.sampleRate / 2.0 / dec
 
     def updateConfig(self, change, radio):
         if change.spectrum.length:
@@ -47,14 +37,18 @@ class PowerSpectrum:
         if change.spectrum.decimation:
             self.config.decimation = change.spectrum.decimation
             self.decimationFilter = DecimationFilter(self.config.decimation)
-        if change.spectrum.crop is not None:
-            self.config.crop = change.spectrum.crop
+            self.config.displayCenter = radio.tunerFreq
+            self.freqShift = FrequencyShift(
+                radio.centerFreq - radio.tunerFreq, 
+                radio.sampleRate, 
+                radio.iqdatalength
+            )
         self.init(radio)
 
     def __call__(self, iq_buffer):
         dec = int(self.config.decimation)
         if dec > 1:
-            iqs = self.decimationFilter(iq_buffer)
+            iqs = self.decimationFilter(self.freqShift(iq_buffer))
         else:
             iqs = iq_buffer
         self.iqbuffer = np.concatenate((self.iqbuffer, iqs))
