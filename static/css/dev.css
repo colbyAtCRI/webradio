@@ -103,40 +103,6 @@ nav {
    position: absolute;
 }
 
-#overlay {
-   font-family: monospace;
-   font-size: 20px;
-   color: white;
-   display: none;
-   position: absolute;
-   top: 6%;
-   right: 2%;
-   opacity: 0.5;
-}
-
-#option-overlay {
-   border-radius: 10px;
-   position: absolute;
-   top: 6%;
-   right: 2%;
-}
-
-.option {
-    font-family: monospace;
-    font-size: 20px;
-    color:  white;
-    background: black;
-}
-
-.option:hover {
-    color: red;
-}
-
-.setting:hover {
-   background: black;
-   opacity: 1;
-}
-
 #display-settings {
     display: none;
     top: 20px;
@@ -193,6 +159,11 @@ nav {
    height: fit-content;
    display: flex;
    justify-content: center;
+}
+
+#zoom-display {
+    margin-left: 0;
+    margin-right: 0;
 }
 
 .control-button {

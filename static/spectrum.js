@@ -149,7 +149,7 @@ class SpectrumDisplay
         this.ctx.textAlign = 'center';
         this.ctx.textBaseline = 'middle';
         let freq = this.xToFreq(this.cursor);
-        this.ctx.fillText(String(Math.floor(freq/1000)),this.cursor,50);
+        this.ctx.fillText(String(Math.round(freq/1000)),this.cursor,50);
     }
 
     drawBandMarker() {

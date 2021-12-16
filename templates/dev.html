@@ -14,6 +14,7 @@
         <script type='text/javascript'>
             const myRadio = '{{myRadio}}';
             const socket = io();
+            const blank = new ChangeOrder();
             function apply(co) {
                 socket.emit('apply',co);
             }  
@@ -75,6 +76,9 @@
         </div>
         <p>
         <section class='control-box'>
+            <button id='unzoom' type='button' class='control-button'>&lt</button>
+            <button id='zoom-display' type='button' class='control-button'></button>
+            <button id='zoom' type='button' class='control-button'>&gt</button>
             <button type='button' id='tuner-lock' class='control-button'>T</button>
             <div class='digit-box' id='tunerfreq'></div>
             <button id='mute' type='button' class='control-button'>M</button>
@@ -85,6 +89,30 @@
         <script type='text/javascript'>
             const spectrumDisplay = new SpectrumDisplay('spectrum');
             var displaySettings = new OptionTable('display-settings');
+            $('#unzoom').on('click',function()
+            {
+                let n = Number($('#zoom-display')[0].innerHTML);
+                if (n > 1) {
+                    let co = new ChangeOrder();
+                    co.spectrum.decimation = n-1;
+                    apply(co);
+                }
+            });
+            $('#zoom').on('click',function()
+            {
+                let n = Number($('#zoom-display')[0].innerHTML);
+                if ( n < 10 ) {
+                    let co = new ChangeOrder();
+                    co.spectrum.decimation = n+1;
+                    apply(co);
+                }
+            });
+            $('#zoom-display').on('click',function()
+            {
+                let co = new ChangeOrder();
+                co.spectrum.decimation = 1;
+                apply(co);
+            });
             // Spectrum Display Control
             displaySettings.addOptions('FFT Length',[512,1024,2048,4096],function(op,val)
             {
@@ -101,6 +129,7 @@
             displaySettings.addOptions('Crop',['on','off'],function(op,val)
             {
                 spectrumDisplay.crop = (val === 'on');
+                spectrumDisplay.updateBackground();
                 op.innerHTML = val;
             }, stat => (spectrumDisplay.crop) ? 'on' : 'off');
             displaySettings.addOptions('Zoom',[1,2,3,4,5,6,7,8,9,10],function(op,val)
@@ -183,7 +212,7 @@
             ]));
             const audioOut = new PCMPlayer();
             // Spectrum UI 
-            $('#spectrum').on('click',() => setTunerFreq(1000*Math.floor(spectrumDisplay.cursorFreq()/1000)));
+            $('#spectrum').on('click',() => setTunerFreq(1000*Math.round(spectrumDisplay.cursorFreq()/1000)));
             // Modem Button
             $('.modem-select').click(function()
             {
@@ -226,6 +255,7 @@
                 presetBox2.updateStatus(stat);
                 displaySettings.monitorStatus(stat);
                 radioSettings.monitorStatus(stat);
+                $('#zoom-display')[0].innerHTML = stat.spectrum.decimation;
             }
             // Trigger a rescale minimum dB on next data event 
             $('#rescale-min').on('click',function()
