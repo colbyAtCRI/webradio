@@ -115,7 +115,7 @@ class FMSModem(Modem):
         self.config.channels = 2
         self.config.bandwidth = 15000
         self.config.gain = 1.0
-        self.n_audio = 5
+        self.n_audio = 4
         self.lastiq = 0
         self.PCM = []
         self.setup(radio)
