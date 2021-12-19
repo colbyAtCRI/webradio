@@ -11,6 +11,11 @@ function linearTransform(x1,x2,y1,y2)
     };
 }
 
+function addCommas(num)
+{
+    return num.replace(/(.)(?=(\d{3})+$)/g,'$1,');
+}
+
 class SpectrumDisplay
 {
     backgroundImage;
@@ -42,9 +47,11 @@ class SpectrumDisplay
     ymax = -10;
     ymin = -140;
     ytic = 20;
+    yLabels = [];
     xmax = 10;
     xmin = 0;
     xtic = 100000;
+    xLabels = [];
     crop = true;
     cursor = -100; // hidden
     scaleMin = false;
@@ -78,7 +85,7 @@ class SpectrumDisplay
     }
 
     drawYTics() {
-        let labels = [];
+        this.yLabels = [];
         this.ctx.strokeStyle = this.scaleStrokeStyle;
         this.ctx.lineWidth = this.scaleLineWidth;
         this.ctx.beginPath();
@@ -87,19 +94,14 @@ class SpectrumDisplay
             let yp = this.yToPixel(y);
             this.ctx.moveTo(0,yp);
             this.ctx.lineTo(this.canvas.width,yp);
-            labels.push(y);
+            this.yLabels.push(y);
             y -= this.ytic;
         }
         this.ctx.stroke();
-        this.ctx.font = this.scaleFont;
-        this.ctx.fillStyle = this.scaleColor;
-        for (let label of labels) {
-            this.ctx.fillText(String(label)+' dB',10,this.yToPixel(label)-5);
-        }
     }
 
     drawXTics() {
-        let labels = [];
+        this.xLabels = [];
         this.ctx.strokeStyle = this.scaleStrokeStyle;
         this.ctx.lineWidth = this.scaleLineWidth;
         this.ctx.beginPath();
@@ -108,17 +110,32 @@ class SpectrumDisplay
             let xp = this.xToPixel(x);
             this.ctx.moveTo(xp,0);
             this.ctx.lineTo(xp,this.canvas.width);
-            labels.push(x);
+            this.xLabels.push(x);
             x += this.xtic;
         }
         this.ctx.stroke();
+    }
+
+    drawLabels(data) {
+        this.ctx.font = this.scaleFont;
+        this.ctx.fillStyle = this.scaleColor;
+        this.ctx.textAlign = 'left';
+        this.ctx.textBaseline = 'bottom';
+        for (let label of this.yLabels) {
+            this.ctx.fillText(String(label)+' dB',10,this.yToPixel(label)-5);
+        }
         this.ctx.font = this.scaleFont;
         this.ctx.fillStyle = this.scaleColor;
         this.ctx.textAlign = 'center';
         this.ctx.textBaseline = 'middle';
-        for (let label of labels) {
+        for (let label of this.xLabels) {
             this.ctx.fillText(String(label/1000000)+' MHz',this.xToPixel(label),this.canvas.height-20);
         } 
+        this.ctx.font = '40pt monospace';
+        this.ctx.fillStyle = 'rgb(255,255,255,1.0)';
+        this.ctx.textAlign = 'center';
+        this.ctx.textBaseline = 'middle';
+        this.ctx.fillText(addCommas(String(data.radio.tunerFreq)),this.canvas.width/2,50);
     }
 
     drawTuner(data) {
@@ -202,10 +219,11 @@ class SpectrumDisplay
             this.ctx.fillStyle.addColorStop(0,this.backgroundTopColor);
             this.ctx.fillStyle.addColorStop(1,this.backgroundBottomColor);
             this.ctx.fillRect(0,0,this.canvas.width,this.canvas.height);
-            this.drawTuner(data);
-            this.drawBandMarker();
             this.drawYTics();
             this.drawXTics();
+            this.drawTuner(data);
+            this.drawBandMarker();
+            this.drawLabels(data);
             this.backgroundImage = this.ctx.getImageData(0,0,this.canvas.width,this.canvas.height);
         }
         this.drawCursor();
