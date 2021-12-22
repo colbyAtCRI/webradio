@@ -16,6 +16,11 @@ function addCommas(num)
     return num.replace(/(.)(?=(\d{3})+$)/g,'$1,');
 }
 
+function roundTo(n,m)
+{
+    return Math.round(n/m)*m;
+}
+
 class SpectrumDisplay
 {
     backgroundImage;
@@ -133,9 +138,9 @@ class SpectrumDisplay
         } 
         this.ctx.font = '40pt monospace';
         this.ctx.fillStyle = 'rgb(255,255,255,1.0)';
-        this.ctx.textAlign = 'center';
-        this.ctx.textBaseline = 'middle';
-        this.ctx.fillText(addCommas(String(data.radio.tunerFreq)),this.canvas.width/2,50);
+        this.ctx.textAlign = 'right';
+        this.ctx.textBaseline = 'top';
+        this.ctx.fillText(addCommas(String(data.radio.tunerFreq)),this.canvas.width-10,10);
     }
 
     drawTuner(data) {
@@ -157,8 +162,8 @@ class SpectrumDisplay
         this.ctx.strokeStyle = this.cursorStrokeStyle;
         this.ctx.beginPath();
         this.ctx.moveTo(this.cursor,0);
-        this.ctx.lineTo(this.cursor,35);
-        this.ctx.moveTo(this.cursor,65);
+        this.ctx.lineTo(this.cursor,100);
+        this.ctx.moveTo(this.cursor,130);
         this.ctx.lineTo(this.cursor,this.canvas.height);
         this.ctx.stroke();
         this.ctx.font = this.cursorFont;
@@ -166,7 +171,8 @@ class SpectrumDisplay
         this.ctx.textAlign = 'center';
         this.ctx.textBaseline = 'middle';
         let freq = this.xToFreq(this.cursor);
-        this.ctx.fillText(String(Math.round(freq/1000)),this.cursor,50);
+        //this.ctx.fillText(String(Math.round(freq/1000)),this.cursor,115);
+        this.ctx.fillText(addCommas(String(roundTo(freq,100))),this.cursor,115);
     }
 
     drawBandMarker() {
