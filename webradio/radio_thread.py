@@ -1,3 +1,14 @@
+try:
+    import SoapySDR as sdr
+except:
+    try:
+        from soapy_sdr import SoapySDR as sdr
+    except:
+        try:
+            from webradio.soapy_sdr import SoapySDR as sdr
+        except:
+            print('SoapySDR not found')
+
 from soapy_sdr import SoapySDR as sdr
 import numpy as np
 from threading import Thread, Event
