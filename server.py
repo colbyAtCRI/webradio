@@ -96,7 +96,7 @@ def claim_radio(indx, audio_sr):
         _radios[sid].start()
         join_room(sid)
         print(f"radio {_radios[sid].hardware.key} opened")
-    except (e):
+    except:
         print("radio open failed")
         return "fail"
     stat = _radios[sid].radioStatus()
