@@ -151,15 +151,19 @@ def factors(N):
 # Returns (actual_sr, filterChain)
 
 def makeFilterChain(RR, AR):
-    rR = round(RR)
-    aR = round(AR)
-    fac = divisors(rR)
-    ll = list(filter(lambda n: n < aR, fac))
-    lu = list(filter(lambda n: n >= aR, fac))
-    A = ll[-1]
-    B = lu[0]
-    if abs(A - aR) < abs(B - aR):
-        dec = round(RR / A)
+    if round(RR/AR) < 10:
+        dec = round(RR/AR)
+        return RR / dec, FilterChain([dec])
     else:
-        dec = round(RR / B)
-    return RR / dec, FilterChain(factors(dec))
+        rR = round(RR)
+        aR = round(AR)
+        fac = divisors(rR)
+        ll = list(filter(lambda n: n < aR, fac))
+        lu = list(filter(lambda n: n >= aR, fac))
+        A = ll[-1]
+        B = lu[0]
+        if abs(A - aR) < abs(B - aR):
+            dec = round(RR / A)
+        else:
+            dec = round(RR / B)
+        return RR / dec, FilterChain(factors(dec))
