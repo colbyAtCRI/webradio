@@ -141,7 +141,7 @@ def on_disconnect():
 
 def start():
     print("starting webradio server")
-    socketio.run(app, host="0.0.0.0", port=5000, debug=True, use_reloader=True)
+    socketio.run(app, host="0.0.0.0", port=5000, debug=False, use_reloader=True)
     for radio in _radios.values():
         radio.stop()
 
