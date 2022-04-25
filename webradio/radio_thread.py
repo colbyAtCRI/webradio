@@ -67,6 +67,7 @@ class Worker(Thread):
 def devs():
     return list(map(dict, sdr.Device_enumerate()))
 
+bwLookup = {196078:190000,158730:150000,111111:100000,55556:50000,37793:25000,16276:10000,8138:5000}
 
 class Radio:
     def __init__(self, dev, audio_sr):
@@ -74,6 +75,8 @@ class Radio:
         self.radio = sdr.Device(dev)
         if dev["driver"] == "sdrplay":
             self.radio.setSampleRate(RX, 0, 768000)
+        elif dev['driver'] == 'rfspace':
+            self.radio.setGain(RX, 0, 0)
         else:
             self.radio.setSampleRate(RX, 0, 1536000)
 
@@ -98,10 +101,11 @@ class Radio:
         self.readSettingsDefaults()
         self.readSettings()
         self.config = JavaDict()
+        self.config.driver = dev['driver']
         self.config.audio_sr = audio_sr
         self.readConfig()
         self.config.frameRate = 60  # milliseconds
-        self.config.iqdatalength = 4096
+        self.config.iqdatalength = 1024
         self.config.offset = 0
         self.config.tunerFreq = self.config.centerFreq + self.config.offset
         self.running = Event()
@@ -166,6 +170,8 @@ class Radio:
         self.config.centerFreq = self.radio.getFrequency(RX, 0)
         self.config.bandwidth = self.radio.getBandwidth(RX, 0)
         self.config.sampleRate = self.radio.getSampleRate(RX, 0)
+        if self.config.bandwidth == 0:
+            self.config.bandwidth = bwLookup.get(self.config.sampleRate,self.config.sampleRate)
         self.config.gain = self.radio.getGain(RX, 0)
         self.config.gainMode = self.radio.getGainMode(RX, 0)
         self.config.antenna = self.radio.getAntenna(RX, 0)

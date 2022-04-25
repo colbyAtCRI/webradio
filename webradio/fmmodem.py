@@ -82,8 +82,8 @@ class WBFMModem(Modem):
         self.deemphasis = DeemphasisFilter(self.config.in_sr)
         self.exit_decimation = Decimator(self.n_audio)
         self.config.out_sr = self.config.in_sr / self.n_audio
-        self.config.fstart = -self.n_audio*radio.audio_sr / 2
-        self.config.fend = self.n_audio*radio.audio_sr / 2
+        self.config.fstart = -self.config.in_sr / 2
+        self.config.fend = self.config.in_sr / 2
 
     def updateConfig(self, change, radio):
         super().updateConfig(change, radio)
@@ -137,8 +137,8 @@ class FMSModem(Modem):
         self.exit_decimation_a = Decimator(self.n_audio)
         self.exit_decimation_b = Decimator(self.n_audio)
         self.config.out_sr = self.config.in_sr / self.n_audio
-        self.config.fstart = -self.n_audio*radio.audio_sr / 2
-        self.config.fend = self.n_audio*radio.audio_sr / 2
+        self.config.fstart = -self.config.in_sr / 2
+        self.config.fend = self.config.in_sr / 2
 
     def updateConfig(self, change, radio):
         super().updateConfig(change, radio)
